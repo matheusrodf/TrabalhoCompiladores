@@ -23,10 +23,11 @@ int getLineCount();
 "read"							{ fprintf(stderr, "READ "); }
 "print"							{ fprintf(stderr, "PRINT "); }
 "return"						{ fprintf(stderr, "RETURN "); }
-[-,;:()[\]{}=+*/%<>&|~]			{ fprintf(stderr, "%c ", yytext[0]); }
+[-,;:()[\]{}=+*/%<>&|~]			{ fprintf(stderr, "(a)%c ", yytext[0]); }
 
 #[0-9]+							{ fprintf(stderr, "LIT_INT "); }
-\'[a-zA-Z]\'							{ fprintf(stderr, "LIT_CHAR "); }
+\'.\'							{ fprintf(stderr, "LIT_CHAR "); }
+\".*\"							{ fprintf(stderr, "LIT_STRING "); }
 
 [0-9a-zA-Z]+					{ fprintf(stderr, "VARIAVEL "); }
 
