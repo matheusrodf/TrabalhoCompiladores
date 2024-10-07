@@ -8,7 +8,6 @@ int getLineCount();
 %}
 
 %x BLOCK_COMMENT
-%x STRING
 
 %option nounput 
 
@@ -27,7 +26,7 @@ int getLineCount();
 
 #[0-9]+							{ fprintf(stderr, "LIT_INT "); }
 \'.\'							{ fprintf(stderr, "LIT_CHAR "); }
-\".*\"							{ fprintf(stderr, "LIT_STRING "); }
+\"(\\\"|[^"\n])*\"			{ fprintf(stderr, "\n(s: %s )", yytext); }
 
 [0-9a-zA-Z]+					{ fprintf(stderr, "VARIAVEL "); }
 
@@ -38,7 +37,7 @@ int getLineCount();
 "//".*		{ fprintf(stderr, "//COMMENT "); }
 "/*"		{ BEGIN BLOCK_COMMENT; fprintf(stderr, "/COMMENTBEGIN "); }
 
-.		{ fprintf(stderr, ". "); }
+.		{ fprintf(stderr, "%c", yytext[0]); }
 
 <BLOCK_COMMENT>"\n"			{ lineCount++; }
 <BLOCK_COMMENT>"."			{ }
