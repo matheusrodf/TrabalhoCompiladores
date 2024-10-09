@@ -3,10 +3,12 @@
 	// Por Matheus Rodrigues Fonseca e Thalles Rezende
 	#include <iostream>
 	#include "tokens.h"
+	using namespace std;
 	int running = 1;
 	int lineCount = 1;
 
 	int getLineNumber();
+	void InsertSymbol(int token, string text);
 %}
 
 %x BLOCK_COMMENT
@@ -26,11 +28,11 @@
 "return"						{ return KW_RETURN;  }
 [-,;:()[\]{}=+*/%<>&|~]			{ return yytext[0];  }
 
-#[0-9]+							{ return LIT_INT;    }
-\'.\'							{ return LIT_CHAR;   }
-\"(\\\"|[^"\n])*\"				{ return LIT_STRING; }
+#[0-9]+							{ InsertSymbol(LIT_INT, yytext); return LIT_INT;    }
+\'.\'							{ InsertSymbol(LIT_CHAR, yytext); return LIT_CHAR;   }
+\"(\\\"|[^"\n])*\"				{ InsertSymbol(LIT_STRING, yytext); return LIT_STRING; }
 
-[0-9a-zA-Z]+					{ fprintf(stderr, "VARIAVEL "); }
+[0-9a-zA-Z]+					{ InsertSymbol(TK_IDENTIFIER, yytext); return TK_IDENTIFIER; }
 
 [ \t]							{  }
 "\n"							{ lineCount++; }

@@ -8,6 +8,7 @@
 int yylex();
 extern FILE *yyin;
 int getLineNumber();
+void PrintSymbols();
 
 int isRunning(void);
 void initMe(void);
@@ -73,7 +74,8 @@ int main(int argc, char** argv) {
 		
 		token = yylex();		
 	}
-	std::cout << "linhas: " << getLineNumber();
+	std::cout << "\n\nlinhas: " << getLineNumber() << "\n";
+	PrintSymbols();
 	
 	return 0;
 }

@@ -3,8 +3,8 @@
 
 OPTIONS = -std=c++11 -Wall
 
-etapa1: lex.yy.o main.o
-	g++ $(OPTIONS) -o etapa1 lex.yy.o main.o
+etapa1: lex.yy.o main.o symbols.o
+	g++ $(OPTIONS) -o etapa1 lex.yy.o main.o symbols.o
 %.o: %.cpp
 	g++ $(OPTIONS) $< -c
 lex.yy.cpp: scanner.l
