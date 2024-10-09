@@ -1,33 +1,13 @@
-[,;:()[]{}=+-*/%<>&|~]
-
-#123 aa
-123 #12
-aa
-#aa
-a+a=b 2 #1
-//#123 123 aaa
-
-/* 
-#123
-123
-aa
-#a
-+
-*/
-
-'a'
-'''
-' '
-''
-'q'
-'3'
-'\n'
-
-"a"
-"qqqq"
-"padokap adpokawd"
-"_ad"
-"\n\n"
-""
-"""
-""""""""""""
+int i = #8;
+char 1 = 'a';
+// esse é um comentário
+// int a = #1 deve ser ignorado;
+/*esse
+comentario
+de 
+int i = #8;
+if 8 = #3 then 1;
+muitas
+linhas também*/\
+if (1 = #3) then #1 else #0;
+return #0;

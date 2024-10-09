@@ -1,10 +1,12 @@
 %{
-#include <iostream>
-#include "tokens.h"
-int running = 1;
-int lineCount = 1;
+	// Parte 1 do trabalho de Compiladores do semestre 2024/2
+	// Por Matheus Rodrigues Fonseca e Thalles Rezende
+	#include <iostream>
+	#include "tokens.h"
+	int running = 1;
+	int lineCount = 1;
 
-int getLineCount();
+	int getLineNumber();
 %}
 
 %x BLOCK_COMMENT
@@ -13,40 +15,41 @@ int getLineCount();
 
 %%
 
-"char"							{ fprintf(stderr, "CHAR "); }
-"int"							{ fprintf(stderr, "INT "); }
-"if"							{ fprintf(stderr, "IF "); }
-"then"							{ fprintf(stderr, "THEN "); }
-"else"							{ fprintf(stderr, "ELSE "); }
-"while"							{ fprintf(stderr, "WHILE "); }
-"read"							{ fprintf(stderr, "READ "); }
-"print"							{ fprintf(stderr, "PRINT "); }
-"return"						{ fprintf(stderr, "RETURN "); }
-[-,;:()[\]{}=+*/%<>&|~]			{ fprintf(stderr, "(a)%c ", yytext[0]); }
+"char"							{ return KW_CHAR;    }
+"int"							{ return KW_INT;     }
+"if"							{ return KW_IF;      }
+"then"							{ return KW_THEN;    }
+"else"							{ return KW_ELSE;    }
+"while"							{ return KW_WHILE;   }
+"read"							{ return KW_READ;    }
+"print"							{ return KW_PRINT;   }
+"return"						{ return KW_RETURN;  }
+[-,;:()[\]{}=+*/%<>&|~]			{ return yytext[0];  }
 
-#[0-9]+							{ fprintf(stderr, "LIT_INT "); }
-\'.\'							{ fprintf(stderr, "LIT_CHAR "); }
-\"(\\\"|[^"\n])*\"			{ fprintf(stderr, "\n(s: %s )", yytext); }
+#[0-9]+							{ return LIT_INT;    }
+\'.\'							{ return LIT_CHAR;   }
+\"(\\\"|[^"\n])*\"				{ return LIT_STRING; }
 
 [0-9a-zA-Z]+					{ fprintf(stderr, "VARIAVEL "); }
 
+[ \t]							{  }
+"\n"							{ lineCount++; }
 
-[ \t]		{ }
-"\n"		{ lineCount++; }
+"//".*							{  }
+"/*"							{ BEGIN BLOCK_COMMENT; }
 
-"//".*		{ fprintf(stderr, "//COMMENT "); }
-"/*"		{ BEGIN BLOCK_COMMENT; fprintf(stderr, "/COMMENTBEGIN "); }
+.								{ return TOKEN_ERROR; }
 
-.		{ fprintf(stderr, "%c", yytext[0]); }
 
-<BLOCK_COMMENT>"\n"			{ lineCount++; }
-<BLOCK_COMMENT>"."			{ }
-<BLOCK_COMMENT>"*/"			{ BEGIN INITIAL; fprintf(stderr, "/ENDCOMMENT "); }
+
+<BLOCK_COMMENT>"\n"				{ lineCount++; }
+<BLOCK_COMMENT>"."				{  }
+<BLOCK_COMMENT>"*/"				{ BEGIN INITIAL; }
 
 
 %%
 
-int getLineCount() {
+int getLineNumber() {
 	return lineCount;
 }
 
