@@ -1,19 +1,24 @@
 %{
 	// Parte 1 do trabalho de Compiladores do semestre 2024/2
-	// Por Matheus Rodrigues Fonseca e Thalles Rezende
+	// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 	#include <iostream>
 	#include "tokens.h"
+	#include "symbols.hpp"
 	using namespace std;
 	int running = 1;
 	int lineCount = 1;
 
+	SymbolsTable symbolsTable;
+
 	int getLineNumber();
-	void InsertSymbol(int token, string text);
+	void initMe();
+
+	#include "main.cpp"
 %}
 
 %x BLOCK_COMMENT
 
-%option nounput 
+%option nounput
 
 %%
 
@@ -28,11 +33,11 @@
 "return"						{ return KW_RETURN;  }
 [-,;:()[\]{}=+*/%<>&|~]			{ return yytext[0];  }
 
-#[0-9]+							{ InsertSymbol(LIT_INT, yytext); return LIT_INT;    }
-\'.\'							{ InsertSymbol(LIT_CHAR, yytext); return LIT_CHAR;   }
-\"(\\\"|[^"\n])*\"				{ InsertSymbol(LIT_STRING, yytext); return LIT_STRING; }
+#[0-9]+ { symbolsTable.insertSymbol(LIT_INT, yytext); return LIT_INT; }
+\'.\'							{ symbolsTable.insertSymbol(LIT_CHAR, yytext); return LIT_CHAR;   }
+\"(\\\"|[^"\n])*\"				{ symbolsTable.insertSymbol(LIT_STRING, yytext); return LIT_STRING; }
 
-[0-9a-zA-Z]+					{ InsertSymbol(TK_IDENTIFIER, yytext); return TK_IDENTIFIER; }
+[0-9a-zA-Z]+ { symbolsTable.insertSymbol(TK_IDENTIFIER, yytext); return TK_IDENTIFIER; }
 
 [ \t]							{  }
 "\n"							{ lineCount++; }
@@ -57,7 +62,7 @@ int getLineNumber() {
 
 // Precisa ter
 void initMe() {
-
+	symbolsTable.initializeTable();
 }
 
 // Precisa ter
@@ -66,6 +71,11 @@ int isRunning() {
 }
 
 int yywrap() {
-	running = 0;
+	if (!feof(yyin)) {
+		running = 1;
+	} else {
+		running = 0;
+		symbolsTable.displayTable();
+	}
 	return 1;
 }
