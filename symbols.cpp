@@ -1,19 +1,28 @@
 // Parte 1 do trabalho de Compiladores do semestre 2024/2
-// Por Matheus Rodrigues Fonseca e Thalles Rezende
+// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
+#include "symbols.hpp"
+#include "tokens.h"
 
-#include <string>
-#include <iostream>
-#include <map>
-using namespace std;
+extern int getLineNumber();
 
-map<string, int> symbolTable;
+void SymbolsTable::initializeTable()
+{
+	table.clear();
+};
 
-void InsertSymbol(int token, string text) {
-	symbolTable[text] = token;
-}
+void SymbolsTable::insertSymbol(const int &token, const std::string &text)
+{
+	if (token == TOKEN_ERROR)
+		printf("Erro detectado na linha %d\n", getLineNumber());
 
-void PrintSymbols() {
-	for (map<string,int>::iterator it=symbolTable.begin(); it != symbolTable.end(); ++it) {
-		std::cout << "id:" << it->first << " tipo: " << it->second << '\n';		
+	table[text] = token;
+};
+
+void SymbolsTable::displayTable()
+{
+	std::cout << "---- TABELA DE SIMBOLOS ----" << std::endl;
+	for (const auto &kv : table)
+	{
+		std::cout << "id: " << kv.first << " tipo: " << kv.second << std::endl;
 	}
-}
+};
