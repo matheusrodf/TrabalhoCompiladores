@@ -33,17 +33,17 @@
 "return"						{ return KW_RETURN;  }
 [-,;:()[\]{}=+*/%<>&|~]			{ return yytext[0];  }
 
-#[0-9]+ { symbolsTable.insertSymbol(LIT_INT, yytext); return LIT_INT; }
-\'.\'							{ symbolsTable.insertSymbol(LIT_CHAR, yytext); return LIT_CHAR;   }
-\"(\\\"|[^"\n])*\"				{ symbolsTable.insertSymbol(LIT_STRING, yytext); return LIT_STRING; }
+#[0-9]+ 						{ symbolsTable.insertSymbol(symbolsTable.createSymbol(LIT_INT, yytext)); return LIT_INT; }
+\'.\'							{ symbolsTable.insertSymbol(symbolsTable.createSymbol(LIT_CHAR, yytext)); return LIT_CHAR;   }
+\"(\\\"|[^"\n])*\"				{ symbolsTable.insertSymbol(symbolsTable.createSymbol(LIT_STRING, yytext)); return LIT_STRING; }
 
-[0-9a-zA-Z]+ { symbolsTable.insertSymbol(TK_IDENTIFIER, yytext); return TK_IDENTIFIER; }
+[0-9a-zA-Z]+ 					{ symbolsTable.insertSymbol(symbolsTable.createSymbol(TK_IDENTIFIER, yytext)); return TK_IDENTIFIER; }
 
 [ \t]							{  }
 "\n"							{ lineCount++; }
 
 "//".*							{  }
-"/*"							{ BEGIN BLOCK_COMMENT; }
+"/**"							{ BEGIN BLOCK_COMMENT; }
 
 .								{ return TOKEN_ERROR; }
 
@@ -51,7 +51,7 @@
 
 <BLOCK_COMMENT>"\n"				{ lineCount++; }
 <BLOCK_COMMENT>"."				{  }
-<BLOCK_COMMENT>"*/"				{ BEGIN INITIAL; }
+<BLOCK_COMMENT>"**/"				{ BEGIN INITIAL; }
 
 
 %%

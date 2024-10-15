@@ -8,15 +8,22 @@
 #include <map>
 #include <string>
 
+struct Symbol {
+	std::string name;
+	int token;
+};
+
 class SymbolsTable
 {
 private:
-  std::map<std::string, int> table;
+  std::map<std::string, Symbol> table;
 
 public:
   void initializeTable();
+  
+  Symbol* createSymbol(const int token, const std::string text);
 
-  void insertSymbol(const int &token, const std::string &text);
+  void insertSymbol(Symbol* symbol);
 
   void displayTable();
 };
