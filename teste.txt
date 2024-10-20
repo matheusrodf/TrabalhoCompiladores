@@ -1,1 +1,11 @@
-if
+int b == #2;
+char a == 'a';
+
+int fun(int a, char b, int c, char d, char fsss) {}
+char f1(int a, char b, int c, char d, char fsss) {}
+char f2(char fsss) {}
+int f3() {}
+char f4() {}
+
+int vecA[#3];
+int vecB[#3] = #2 #1 #3 #4;

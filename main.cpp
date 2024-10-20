@@ -17,12 +17,17 @@ int main(int argc, char **argv)
 
 	if (argc < 2)
 	{
-		fprintf(stderr, "./etapa1 <file>\n");
+		fprintf(stderr, "./etapa2 <file>\n");
 		return -1;
 	}
 	else
 	{
 		yyin = fopen(argv[1], "r");
+		if (yyin == NULL) {
+			
+			fprintf(stderr, "Erro ao ler o arquivo.\n");
+			return -1;
+		};
 	}
 	yyparse();
 	std::cout << "\n\nNumero de linhas: " << getLineNumber() << "\n";

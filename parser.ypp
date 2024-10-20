@@ -4,6 +4,7 @@
 	
 	int yylex();
 	int yyerror(string msg);
+	extern int getLineNumber();
 %}
 
 %token KW_CHAR      
@@ -23,16 +24,58 @@
 
 %%
 
-programa: aa
+programa: decVar programa
+	| decVec programa
+	| decFun programa
+	|
 	;
 	
-aa: KW_IF
+decVar: KW_CHAR TK_IDENTIFIER '=' '=' LIT_CHAR ';'
+	| KW_INT TK_IDENTIFIER '=' '=' LIT_INT ';'
+	;
+	
+decVec: KW_INT TK_IDENTIFIER '[' LIT_INT ']' listaInt
+	| KW_CHAR TK_IDENTIFIER '[' LIT_INT ']' listaChar
+	;
+	
+listaInt: ';'
+	| '=' LIT_INT listaInt2
+	;
+	
+listaInt2: LIT_INT listaInt2
+	| ';'
+	;
+	
+listaChar: ';'
+	| '=' LIT_CHAR listaChar2
+	;
+	
+listaChar2: LIT_CHAR listaChar2
+	| ';'
 	;
 
+decFun: KW_CHAR TK_IDENTIFIER '(' params ')' '{' block '}'
+	| KW_INT TK_IDENTIFIER '(' params ')' '{' block '}'
+	;
+	
+params: KW_CHAR TK_IDENTIFIER tail
+	| KW_INT TK_IDENTIFIER tail
+	|
+	;
+
+tail: ',' KW_CHAR TK_IDENTIFIER tail
+	| ',' KW_INT TK_IDENTIFIER tail
+	|
+	;
+	
+block: LIT_STRING
+	|
+	;
+	
 
 %%
 
 int yyerror(string msg) {
-	std::cout << msg;
+	std::cout << "Erro linha: " << getLineNumber();
 	return 0;
 }
