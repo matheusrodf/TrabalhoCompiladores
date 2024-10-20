@@ -2,14 +2,13 @@
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 
 #include <iostream>
-#include "tokens.h"
 
-int yylex();
 extern FILE *yyin;
 extern int getLineNumber();
 
 int isRunning(void);
 void initMe(void);
+int yyparse();
 
 int main(int argc, char **argv)
 {
@@ -25,10 +24,7 @@ int main(int argc, char **argv)
 	{
 		yyin = fopen(argv[1], "r");
 	}
-	while (isRunning())
-	{
-		token = yylex();
-	}
+	yyparse();
 	std::cout << "\n\nNumero de linhas: " << getLineNumber() << "\n";
 
 	return 0;

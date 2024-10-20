@@ -1,7 +1,7 @@
 // Parte 1 do trabalho de Compiladores do semestre 2024/2
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 #include "symbols.hpp"
-#include "tokens.h"
+#include "parser.tab.hpp"
 
 extern int getLineNumber();
 

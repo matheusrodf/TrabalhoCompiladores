@@ -1,14 +1,1 @@
-int i = #8;
-char 1 = 'a';
-// esse é um comentário
-// int a = #1 deve ser ignorado;
-/**esse
-comentario
-de 
-int c = #8;
-if 8 = #3 then 1;
-muitas
-linhas também**/\
-if (1 = #3) then #1 else #0;
-return #0;
-read s = "oioi string muito legal\" com \" e \n uau ";
+if

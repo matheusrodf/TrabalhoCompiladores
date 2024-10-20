@@ -2,7 +2,7 @@
 	// Parte 1 do trabalho de Compiladores do semestre 2024/2
 	// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 	#include <iostream>
-	#include "tokens.h"
+	#include "parser.tab.hpp"
 	#include "symbols.hpp"
 	using namespace std;
 	int running = 1;
