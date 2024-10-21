@@ -1,9 +1,13 @@
+	// Etapa 2 do trabalho de Compiladores do semestre 2024/2
+	// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
+
 %{ 
 	#include <iostream>
 	using namespace std;
 	
 	int yylex();
 	int yyerror(string msg);
+	extern char* yytext;
 	extern int getLineNumber();
 %}
 
@@ -30,52 +34,56 @@ programa: decVar programa
 	|
 	;
 	
-decVar: KW_CHAR TK_IDENTIFIER '=' '=' LIT_CHAR ';'
-	| KW_INT TK_IDENTIFIER '=' '=' LIT_INT ';'
+expressao: LIT_CHAR
+	| LIT_INT
 	;
 	
-decVec: KW_INT TK_IDENTIFIER '[' LIT_INT ']' listaInt
-	| KW_CHAR TK_IDENTIFIER '[' LIT_INT ']' listaChar
+expressao2: LIT_CHAR
+	| LIT_INT
+	| TK_IDENTIFIER
 	;
 	
-listaInt: ';'
-	| '=' LIT_INT listaInt2
+tipo: KW_CHAR
+	| KW_INT
 	;
 	
-listaInt2: LIT_INT listaInt2
-	| ';'
+decVar: tipo TK_IDENTIFIER '=' '=' expressao ';'
 	;
 	
-listaChar: ';'
-	| '=' LIT_CHAR listaChar2
+decVec: tipo TK_IDENTIFIER '[' LIT_INT ']' VecList
 	;
 	
-listaChar2: LIT_CHAR listaChar2
+VecList: ';'
+	| '=' expressao VecList2
+	;
+	
+VecList2: expressao VecList2
 	| ';'
 	;
 
-decFun: KW_CHAR TK_IDENTIFIER '(' params ')' '{' block '}'
-	| KW_INT TK_IDENTIFIER '(' params ')' '{' block '}'
+decFun: tipo TK_IDENTIFIER '(' params ')' '{' block '}'
 	;
 	
-params: KW_CHAR TK_IDENTIFIER tail
-	| KW_INT TK_IDENTIFIER tail
+params: tipo TK_IDENTIFIER tail
 	|
 	;
 
-tail: ',' KW_CHAR TK_IDENTIFIER tail
-	| ',' KW_INT TK_IDENTIFIER tail
+tail: ',' tipo TK_IDENTIFIER tail
 	|
 	;
 	
-block: LIT_STRING
-	|
+block: atribuicao
+	| ";"
 	;
 	
+atribuicao: TK_IDENTIFIER "=" expressao2 ";"
+	| TK_IDENTIFIER "[" expressao2 "]" "=" expressao2 ";"
+	;
+
 
 %%
 
 int yyerror(string msg) {
-	std::cout << "Erro linha: " << getLineNumber();
-	return 0;
+	std::cout << "\n[ERRO] linha: " << getLineNumber() << ": " << yytext << "\n";
+	exit(3);
 }

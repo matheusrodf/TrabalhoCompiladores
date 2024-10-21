@@ -1,5 +1,5 @@
 %{
-	// Parte 1 do trabalho de Compiladores do semestre 2024/2
+	// Etapa 2 do trabalho de Compiladores do semestre 2024/2
 	// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 	#include <iostream>
 	#include "parser.tab.hpp"
@@ -77,5 +77,5 @@ int yywrap() {
 		running = 0;
 		symbolsTable.displayTable();
 	}
-	return 1;
+	exit(0);
 }

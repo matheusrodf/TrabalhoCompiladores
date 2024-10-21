@@ -1,4 +1,4 @@
-// Parte 1 do trabalho de Compiladores do semestre 2024/2
+// Etapa 2 do trabalho de Compiladores do semestre 2024/2
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 #include "symbols.hpp"
 #include "parser.tab.hpp"
