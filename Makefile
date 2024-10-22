@@ -10,7 +10,7 @@ target: %$(ETAPA)
 	g++ $(OPTIONS) -o $(ETAPA) lex.yy.o symbols.o parser.tab.o
 %.o: %.cpp %.hpp
 	g++ $(OPTIONS) $< -c
-	
+
 parser.tab.cpp: parser.ypp
 	bison parser.ypp -d
 
