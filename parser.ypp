@@ -1,30 +1,30 @@
 	// Etapa 2 do trabalho de Compiladores do semestre 2024/2
 	// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 
-%{ 
+%{
 	#include <iostream>
 	using namespace std;
-	
+
 	int yylex();
 	int yyerror(string msg);
 	extern char* yytext;
 	extern int getLineNumber();
 %}
 
-%token KW_CHAR      
-%token KW_INT              
-%token KW_IF        
-%token KW_THEN      
-%token KW_ELSE      
-%token KW_WHILE     
-%token KW_READ      
-%token KW_PRINT     
-%token KW_RETURN    
+%token KW_CHAR
+%token KW_INT
+%token KW_IF
+%token KW_THEN
+%token KW_ELSE
+%token KW_WHILE
+%token KW_READ
+%token KW_PRINT
+%token KW_RETURN
 %token TK_IDENTIFIER
-%token LIT_INT      
-%token LIT_CHAR     
-%token LIT_STRING   
-%token TOKEN_ERROR  
+%token LIT_INT
+%token LIT_CHAR
+%token LIT_STRING
+%token TOKEN_ERROR
 
 %%
 
@@ -33,37 +33,37 @@ programa: decVar programa
 	| decFun programa
 	|
 	;
-	
+
 expressao: LIT_CHAR
 	| LIT_INT
 	;
-	
+
 expressao2: LIT_CHAR
-	| LIT_INT
-	| TK_IDENTIFIER
+	| cmd_func
+	| op_arit
 	;
-	
+
 tipo: KW_CHAR
 	| KW_INT
 	;
-	
+
 decVar: tipo TK_IDENTIFIER '=' '=' expressao ';'
 	;
-	
+
 decVec: tipo TK_IDENTIFIER '[' LIT_INT ']' VecList
 	;
-	
+
 VecList: ';'
 	| '=' expressao VecList2
 	;
-	
+
 VecList2: expressao VecList2
 	| ';'
 	;
 
-decFun: tipo TK_IDENTIFIER '(' params ')' '{' block '}'
+decFun: tipo TK_IDENTIFIER '(' params ')' block
 	;
-	
+
 params: tipo TK_IDENTIFIER tail
 	|
 	;
@@ -71,15 +71,68 @@ params: tipo TK_IDENTIFIER tail
 tail: ',' tipo TK_IDENTIFIER tail
 	|
 	;
-	
-block: atribuicao
-	| ";"
-	;
-	
-atribuicao: TK_IDENTIFIER "=" expressao2 ";"
-	| TK_IDENTIFIER "[" expressao2 "]" "=" expressao2 ";"
+
+block: '{' list_cmds '}'
 	;
 
+list_cmds: cmd_if list_cmds
+	| cmd_while list_cmds
+	| cmd_print ';' list_cmds
+	| cmd_read ';' list_cmds
+	| cmd_return ';' list_cmds
+	| cmd_attr ';' list_cmds
+	| cmd_func ';'
+	|
+;
+
+cmd_func: TK_IDENTIFIER '(' func_params ')'
+func_params: TK_IDENTIFIER tail
+	|
+	;
+
+op_arit: LIT_INT
+	| TK_IDENTIFIER
+	| cmd_func
+	| op_arit '+' op_arit
+	| op_arit '*' op_arit
+	| op_arit '/' op_arit
+	| op_arit '-' op_arit
+	|
+;
+
+op_bool: LIT_INT
+	| TK_IDENTIFIER
+	| op_bool '<' op_bool
+	| op_bool '>' op_bool
+	| op_bool '=' op_bool
+	| op_bool '&' op_bool
+	| op_bool '|' op_bool
+	| '~' op_bool
+	|
+;
+
+cmd_attr: TK_IDENTIFIER '=' expressao2 ';'
+	| TK_IDENTIFIER '[' expressao2 ']' '=' expressao2 ';'
+;
+
+cmd_if: KW_IF '(' op_bool ')' KW_THEN block KW_ELSE block
+	| KW_IF '(' op_bool ')' KW_THEN block
+;
+
+cmd_while: KW_WHILE '(' op_bool ')' block
+;
+
+print_args: LIT_STRING print_args
+	| LIT_CHAR print_args
+	| op_arit print_args
+	|
+;
+
+cmd_read: KW_READ TK_IDENTIFIER
+;
+cmd_print: KW_PRINT print_args
+cmd_return: KW_RETURN expressao2
+;
 
 %%
 
