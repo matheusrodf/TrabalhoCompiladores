@@ -82,6 +82,7 @@ block: '{' list_cmds '}'
 
 list_cmds: cmd list_cmds
 	|
+	;
 
 cmd: cmd_if 
 	| cmd_while 
