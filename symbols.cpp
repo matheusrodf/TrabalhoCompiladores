@@ -34,7 +34,7 @@ void SymbolsTable::insertSymbol(Symbol* symbol)
 
 void SymbolsTable::displayTable()
 {
-	std::cout << "---- TABELA DE SIMBOLOS ----" << std::endl;
+	std::cout << "\n---- TABELA DE SIMBOLOS ----" << std::endl;
 	for (const auto &kv : table)
 	{
 		std::cout << "id[" << kv.first << "] = nome(" << kv.second.name << ") token(" << kv.second.token << ")" << std::endl;

@@ -26,6 +26,16 @@
 %token LIT_STRING
 %token TOKEN_ERROR
 
+
+%left '|'
+%left '&'
+%left '='
+%left '<' '>'
+%left '+' '-'
+%left '*' '/'
+%right '~'
+%left '('
+
 %%
 
 programa: decVar programa
@@ -72,15 +82,16 @@ block: '{' list_cmds '}'
 
 list_cmds: cmd list_cmds
 	|
-;
 
-cmd: cmd_if
-	| cmd_while
-	| cmd_print
+cmd: cmd_if 
+	| cmd_while 
+	| cmd_print 
 	| cmd_read ';'
 	| cmd_return ';'
-	| cmd_attr
+	| cmd_attr ';'
 	| block
+	| ';'
+	;
 
 cmd_func: TK_IDENTIFIER '(' func_params ')'
 func_params: expressao func_tail
@@ -91,40 +102,42 @@ func_tail: ',' expressao func_tail
 	|
 	;
 
-expressao: LIT_INT
-	| TK_IDENTIFIER
+expressao: LIT_INT						{fprintf(stderr, "%s", yytext);}
+	| TK_IDENTIFIER						{fprintf(stderr, "%s", yytext);}
 	| TK_IDENTIFIER '[' expressao ']'
 	| cmd_func
-	| expressao '+' expressao
-	| expressao '*' expressao
-	| expressao '/' expressao
-	| expressao '-' expressao
-	| expressao '<' expressao
-	| expressao '>' expressao
-	| expressao '=' expressao
-	| expressao '&' expressao
-	| expressao '|' expressao
-	| '~' expressao
-	|
+	| '~' expressao						{fprintf(stderr, "~");}
+	| '(' expressao ')'					{fprintf(stderr, "(");}
+	| expressao '*' expressao			{fprintf(stderr, "*");}
+	| expressao '/' expressao			{fprintf(stderr, "/");}
+	| expressao '+' expressao			{fprintf(stderr, "+");}
+	| expressao '-' expressao			{fprintf(stderr, "-");}
+	| expressao '<' expressao           {fprintf(stderr, "<");}
+	| expressao '>' expressao           {fprintf(stderr, ">");}
+	| expressao '=' expressao           {fprintf(stderr, "=");}
+	| expressao '&' expressao           {fprintf(stderr, "&");}
+	| expressao '|' expressao           {fprintf(stderr, "|");}
 ;
 
-cmd_attr: TK_IDENTIFIER '=' expressao ';'
-	| TK_IDENTIFIER '[' expressao ']' '=' expressao ';'
+cmd_attr: TK_IDENTIFIER '=' expressao
+	| TK_IDENTIFIER '[' expressao ']' '=' expressao
 ;
 
-cmd_if: KW_IF '(' expressao ')' KW_THEN cmd KW_ELSE cmd
-	| KW_IF '(' expressao ')' KW_THEN cmd KW_ELSE cmd ';'
-	| KW_IF '(' expressao ')' KW_THEN cmd
-	| KW_IF '(' expressao ')' KW_THEN cmd ';'
+cmd_if: KW_IF '(' expressao ')' KW_THEN cmd
+	| KW_IF '(' expressao ')' KW_THEN cmd KW_ELSE cmd
 ;
 
-cmd_while: KW_WHILE '(' expressao ')' block
+cmd_while: KW_WHILE '(' expressao ')' cmd
 ;
 
-print_args: LIT_STRING print_args
-	| expressao print_args
+print_args: LIT_STRING print_tail
+	| expressao print_tail
+;
+
+print_tail: LIT_STRING print_tail
+	| expressao print_tail
 	| ';'
-;
+	;
 
 cmd_read: KW_READ TK_IDENTIFIER
 ;
