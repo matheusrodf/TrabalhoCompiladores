@@ -102,21 +102,21 @@ func_tail: ',' expressao func_tail
 	|
 	;
 
-expressao: LIT_INT						{fprintf(stderr, "%s", yytext);}
-	| TK_IDENTIFIER						{fprintf(stderr, "%s", yytext);}
+expressao: LIT_INT						
+	| TK_IDENTIFIER						
 	| TK_IDENTIFIER '[' expressao ']'
 	| cmd_func
-	| '~' expressao						{fprintf(stderr, "~");}
-	| '(' expressao ')'					{fprintf(stderr, "(");}
-	| expressao '*' expressao			{fprintf(stderr, "*");}
-	| expressao '/' expressao			{fprintf(stderr, "/");}
-	| expressao '+' expressao			{fprintf(stderr, "+");}
-	| expressao '-' expressao			{fprintf(stderr, "-");}
-	| expressao '<' expressao           {fprintf(stderr, "<");}
-	| expressao '>' expressao           {fprintf(stderr, ">");}
-	| expressao '=' expressao           {fprintf(stderr, "=");}
-	| expressao '&' expressao           {fprintf(stderr, "&");}
-	| expressao '|' expressao           {fprintf(stderr, "|");}
+	| '~' expressao						
+	| '(' expressao ')'					
+	| expressao '*' expressao			
+	| expressao '/' expressao			
+	| expressao '+' expressao			
+	| expressao '-' expressao			
+	| expressao '<' expressao          
+	| expressao '>' expressao           
+	| expressao '=' expressao           
+	| expressao '&' expressao           
+	| expressao '|' expressao          
 ;
 
 cmd_attr: TK_IDENTIFIER '=' expressao
