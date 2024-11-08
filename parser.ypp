@@ -3,6 +3,7 @@
 
 %{
 	#include <iostream>
+	#include "ast.hpp"
 	using namespace std;
 
 	int yylex();
@@ -95,6 +96,9 @@ cmd: cmd_if
 	;
 
 cmd_func: TK_IDENTIFIER '(' func_params ')'
+	;
+
+
 func_params: expressao func_tail
 	|
 	;
@@ -103,7 +107,8 @@ func_tail: ',' expressao func_tail
 	|
 	;
 
-expressao: LIT_INT						
+expressao: LIT_INT	
+	| LIT_CHAR
 	| TK_IDENTIFIER						
 	| TK_IDENTIFIER '[' expressao ']'
 	| cmd_func
@@ -118,22 +123,22 @@ expressao: LIT_INT
 	| expressao '=' expressao           
 	| expressao '&' expressao           
 	| expressao '|' expressao          
-;
+	;
 
 cmd_attr: TK_IDENTIFIER '=' expressao
 	| TK_IDENTIFIER '[' expressao ']' '=' expressao
-;
+	;
 
 cmd_if: KW_IF '(' expressao ')' KW_THEN cmd
 	| KW_IF '(' expressao ')' KW_THEN cmd KW_ELSE cmd
-;
+	;
 
 cmd_while: KW_WHILE '(' expressao ')' cmd
-;
+	;
 
 print_args: LIT_STRING print_tail
 	| expressao print_tail
-;
+	;
 
 print_tail: LIT_STRING print_tail
 	| expressao print_tail
@@ -141,10 +146,13 @@ print_tail: LIT_STRING print_tail
 	;
 
 cmd_read: KW_READ TK_IDENTIFIER
-;
+	;
+	
 cmd_print: KW_PRINT print_args
+	;
+	
 cmd_return: KW_RETURN expressao
-;
+	;
 
 %%
 
