@@ -1,7 +1,6 @@
 // Etapa 2 do trabalho de Compiladores do semestre 2024/2
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 #include "symbols.hpp"
-#include "parser.tab.hpp"
 
 extern int getLineNumber();
 
@@ -19,17 +18,13 @@ Symbol* SymbolsTable::createSymbol(const int token, const std::string text)
 	s->name = text;
 	s->token = token;
 	
+	// Busca na tabela se nome ja existe, se não existir, cria
+	if (table.find(s->name) == table.end()) {
+		table[s->name] = *s;
+	}
+	
 	return s;
 };
-
-void SymbolsTable::insertSymbol(Symbol* symbol)
-{
-	
-	// Busca na tabela se nome ja existe, se não existir, cria
-	if (table.find(symbol->name) == table.end()) {
-		table[symbol->name] = *symbol;
-	}
-}
 
 
 void SymbolsTable::displayTable()

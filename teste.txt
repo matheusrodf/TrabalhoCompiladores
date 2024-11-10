@@ -17,7 +17,7 @@ linhas
 int main ()
   {
   number = 0;
-  7 = 7 - 1;
+  7 = 'A';
   7 = #5;
   v[7] = #55;
   print v[#5] 7 c;

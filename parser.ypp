@@ -12,6 +12,12 @@
 	extern int getLineNumber();
 %}
 
+%union {
+	AST *ast;
+	Symbol *symbol;
+	int a;
+}
+
 %token KW_CHAR
 %token KW_INT
 %token KW_IF
@@ -21,11 +27,13 @@
 %token KW_READ
 %token KW_PRINT
 %token KW_RETURN
-%token TK_IDENTIFIER
-%token LIT_INT
-%token LIT_CHAR
-%token LIT_STRING
+%token<ast> TK_IDENTIFIER
+%token<symbol> LIT_INT
+%token<symbol> LIT_CHAR
+%token<symbol> LIT_STRING
 %token TOKEN_ERROR
+
+%type<ast> expressao
 
 
 %left '|'
@@ -107,25 +115,25 @@ func_tail: ',' expressao func_tail
 	|
 	;
 
-expressao: LIT_INT	
-	| LIT_CHAR
+expressao: LIT_INT						{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
+	| LIT_CHAR							{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
 	| TK_IDENTIFIER						
 	| TK_IDENTIFIER '[' expressao ']'
 	| cmd_func
 	| '~' expressao						
 	| '(' expressao ')'					
-	| expressao '*' expressao			
-	| expressao '/' expressao			
-	| expressao '+' expressao			
-	| expressao '-' expressao			
-	| expressao '<' expressao          
+	| expressao '*' expressao			{$$ = createAST(ARIT_MULT, 0, $1, $3, 0, 0);}
+	| expressao '/' expressao			{$$ = createAST(ARIT_DIV, 0, $1, $3, 0, 0);}
+	| expressao '+' expressao			{$$ = createAST(ARIT_SOMA, 0, $1, $3, 0, 0);}	
+	| expressao '-' expressao			{$$ = createAST(ARIT_SUB, 0, $1, $3, 0, 0);}
+	| expressao '<' expressao           
 	| expressao '>' expressao           
 	| expressao '=' expressao           
 	| expressao '&' expressao           
 	| expressao '|' expressao          
 	;
 
-cmd_attr: TK_IDENTIFIER '=' expressao
+cmd_attr: TK_IDENTIFIER '=' expressao	{printAST($3);}
 	| TK_IDENTIFIER '[' expressao ']' '=' expressao
 	;
 

@@ -8,6 +8,11 @@
 #include <map>
 #include <string>
 
+struct AST;
+struct Symbol;
+
+#include "parser.tab.hpp"
+
 struct Symbol {
 	std::string name;
 	int token;
@@ -22,8 +27,6 @@ public:
   void initializeTable();
   
   Symbol* createSymbol(const int token, const std::string text);
-
-  void insertSymbol(Symbol* symbol);
 
   void displayTable();
 };

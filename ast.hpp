@@ -3,7 +3,6 @@
 
 #include "symbols.hpp"
 
-
 enum TYPES {
 	NENHUM = 0,
 	IDENTIFICADOR = 1,
@@ -30,7 +29,7 @@ struct AST {
 	AST* filho4;
 };
 
-void printAST(AST ast);
+void printAST(AST *ast);
 
 AST* createAST(TYPES tipo, Symbol* id, AST* filho1, AST* filho2, AST* filho3, AST* filho4);
 

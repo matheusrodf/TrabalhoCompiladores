@@ -6,8 +6,8 @@ ETAPA = etapa3
 
 target: %$(ETAPA)
 
-%$(ETAPA): lex.yy.o symbols.o parser.tab.o ast.o
-	g++ $(OPTIONS) -o $(ETAPA) lex.yy.o symbols.o parser.tab.o ast.o
+%$(ETAPA): symbols.o ast.o parser.tab.o lex.yy.o
+	g++ $(OPTIONS) -o $(ETAPA) symbols.o ast.o parser.tab.o lex.yy.o
 %.o: %.cpp %.hpp
 	g++ $(OPTIONS) $< -c
 
