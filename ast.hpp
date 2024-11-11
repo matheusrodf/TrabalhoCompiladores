@@ -1,3 +1,6 @@
+// Etapa 3 do trabalho de Compiladores do semestre 2024/2
+// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
+
 #ifndef AST_HPP
 #define AST_HPP
 
@@ -6,8 +9,7 @@
 enum TYPES {
 	NENHUM = 0,
 	IDENTIFICADOR = 1,
-	COMANDO = 2,
-	ASSINALAMENTO = 3,
+	FUNCTION = 2,
 	ARIT_SOMA = 4,
 	ARIT_SUB = 5,
 	ARIT_MULT = 6,
@@ -17,7 +19,21 @@ enum TYPES {
 	BOOL_MAIOR = 10,
 	BOOL_IGUAL = 11,
 	BOOL_AND = 12,
-	BOOL_OR = 13
+	BOOL_OR = 13,
+	LIST_CMD = 14,
+	CMD_IF = 15,
+	CMD_WHILE = 16,
+	CMD_READ = 17,
+	CMD_PRINT = 18,
+	CMD_PRINT_LIST = 3,
+	CMD_RETURN = 19,
+	CMD_ATTR = 20,
+	DEC_VAR = 21,
+	DEC_VAR_LIST = 22,
+	DEC_FUN = 23,
+	DEC_FUN_LIST = 24,
+	CHAR = 25,
+	INT = 26
 };
 
 struct AST {
@@ -26,12 +42,12 @@ struct AST {
 	AST* filho1;
 	AST* filho2;
 	AST* filho3;
-	AST* filho4;
+	Symbol* id2;
 };
 
 void printAST(AST *ast);
 
-AST* createAST(TYPES tipo, Symbol* id, AST* filho1, AST* filho2, AST* filho3, AST* filho4);
+AST* createAST(TYPES tipo, Symbol* id, AST* filho1, AST* filho2, AST* filho3, Symbol* id2);
 
 
 

@@ -1,4 +1,4 @@
-	// Etapa 2 do trabalho de Compiladores do semestre 2024/2
+	// Etapa 3 do trabalho de Compiladores do semestre 2024/2
 	// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 
 %{
@@ -27,13 +27,37 @@
 %token KW_READ
 %token KW_PRINT
 %token KW_RETURN
-%token<ast> TK_IDENTIFIER
+%token<symbol> TK_IDENTIFIER
 %token<symbol> LIT_INT
 %token<symbol> LIT_CHAR
 %token<symbol> LIT_STRING
 %token TOKEN_ERROR
 
 %type<ast> expressao
+%type<ast> programa
+%type<ast> init
+%type<ast> tipo
+%type<ast> decVar
+%type<ast> decVec
+%type<ast> VecList
+%type<ast> VecList2
+%type<ast> decFun
+%type<ast> params
+%type<ast> tail
+%type<ast> block
+%type<ast> list_cmds
+%type<ast> cmd
+%type<ast> func_params
+%type<ast> func_tail
+%type<ast> cmd_func
+%type<ast> cmd_attr
+%type<ast> cmd_if
+%type<ast> cmd_print
+%type<ast> cmd_return
+%type<ast> cmd_read
+%type<ast> cmd_while
+%type<ast> print_args
+%type<ast> print_tail
 
 
 %left '|'
@@ -47,50 +71,53 @@
 
 %%
 
-programa: decVar programa
-	| decVec programa
-	| decFun programa
-	|
+inicial: programa				{printAST(createAST(NENHUM, 0, $1, 0, 0, 0));}
+		;
+
+programa: decVar programa							{ $$ = createAST(NENHUM, 0, $1, $2, 0, 0); }
+	| decVec programa								{ $$ = createAST(NENHUM, 0, $1, $2, 0, 0); }
+	| decFun programa								{ $$ = createAST(NENHUM, 0, $1, $2, 0, 0); }
+	|												{$$ = 0;}
 	;
 
-init: LIT_CHAR
-	| LIT_INT
+init: LIT_CHAR										{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
+	| LIT_INT										{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
 	;
 
-tipo: KW_CHAR
-	| KW_INT
+tipo: KW_CHAR										{$$ = createAST(CHAR, 0, 0, 0, 0, 0);}
+	| KW_INT										{$$ = createAST(INT, 0, 0, 0, 0, 0);}
 	;
 
-decVar: tipo TK_IDENTIFIER '=' init ';'
+decVar: tipo TK_IDENTIFIER '=' init ';'				{$$ = createAST(DEC_VAR, $2, $1, $4, 0, 0);}
 	;
 
-decVec: tipo TK_IDENTIFIER '[' LIT_INT ']' VecList
+decVec: tipo TK_IDENTIFIER '[' LIT_INT ']' VecList	{createAST(DEC_VAR, $2, $1, $6, 0, $4);}
 	;
 
-VecList: ';'
-	| '=' init VecList2
+VecList: ';'										{$$ = 0;}							
+	| '=' init VecList2								{$$ = createAST(DEC_VAR_LIST, 0, $2, $3, 0, 0);}
 	;
 
-VecList2: init VecList2
-	| ';'
+VecList2: init VecList2								{$$ = createAST(DEC_VAR_LIST, 0, $1, $2, 0, 0);}
+	| ';'											{$$ = 0;}
 	;
 
-decFun: tipo TK_IDENTIFIER '(' params ')' block
+decFun: tipo TK_IDENTIFIER '(' params ')' block		{$$ = createAST(DEC_FUN, $2, $1, $4, $6, 0);}
 	;
 
-params: tipo TK_IDENTIFIER tail
-	|
+params: tipo TK_IDENTIFIER tail						{$$ = createAST(DEC_FUN_LIST, $2, $1, $3, 0, 0);}
+	|												{$$ = 0;}
 	;
 
-tail: ',' tipo TK_IDENTIFIER tail
-	|
+tail: ',' tipo TK_IDENTIFIER tail					{$$ = createAST(DEC_FUN_LIST, $3, $2, $4, 0, 0);}
+	|												{$$ = 0;}
 	;
 
-block: '{' list_cmds '}'
+block: '{' list_cmds '}'							{$$ = $2;}
 	;
 
-list_cmds: cmd list_cmds
-	|
+list_cmds: cmd list_cmds							{$$ = createAST(LIST_CMD, 0, $1, $2, 0, 0);}
+	|												{$$ = 0;}
 	;
 
 cmd: cmd_if 
@@ -100,66 +127,66 @@ cmd: cmd_if
 	| cmd_return ';'
 	| cmd_attr ';'
 	| block
-	| ';'
+	| ';'		{$$ = 0;}
 	;
 
-cmd_func: TK_IDENTIFIER '(' func_params ')'
+cmd_func: TK_IDENTIFIER '(' func_params ')'		{$$ = createAST(FUNCTION, $1, $3, 0, 0, 0);}
 	;
 
 
-func_params: expressao func_tail
-	|
+func_params: expressao func_tail		{$$ = createAST(FUNCTION, 0, $1, $2, 0, 0);}
+	|									{$$ = 0;}
 	;
 
-func_tail: ',' expressao func_tail
-	|
+func_tail: ',' expressao func_tail		{$$ = createAST(FUNCTION, 0, $2, $3, 0, 0);}
+	|									{$$ = 0;}
 	;
 
 expressao: LIT_INT						{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
 	| LIT_CHAR							{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
-	| TK_IDENTIFIER						
-	| TK_IDENTIFIER '[' expressao ']'
-	| cmd_func
-	| '~' expressao						
-	| '(' expressao ')'					
+	| TK_IDENTIFIER						{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
+	| TK_IDENTIFIER '[' expressao ']'   {$$ = createAST(IDENTIFICADOR, $1, $3, 0, 0, 0);}
+	| cmd_func							{$$ = $1;}
+	| '~' expressao						{$$ = createAST(BOOL_NEGACAO, 0, $2, 0, 0, 0);}
+	| '(' expressao ')'					{$$ = $2;}
 	| expressao '*' expressao			{$$ = createAST(ARIT_MULT, 0, $1, $3, 0, 0);}
 	| expressao '/' expressao			{$$ = createAST(ARIT_DIV, 0, $1, $3, 0, 0);}
 	| expressao '+' expressao			{$$ = createAST(ARIT_SOMA, 0, $1, $3, 0, 0);}	
 	| expressao '-' expressao			{$$ = createAST(ARIT_SUB, 0, $1, $3, 0, 0);}
-	| expressao '<' expressao           
-	| expressao '>' expressao           
-	| expressao '=' expressao           
-	| expressao '&' expressao           
-	| expressao '|' expressao          
+	| expressao '<' expressao           {$$ = createAST(BOOL_MENOR, 0, $1, $3, 0, 0);}
+	| expressao '>' expressao           {$$ = createAST(BOOL_MAIOR, 0, $1, $3, 0, 0);}
+	| expressao '=' expressao           {$$ = createAST(BOOL_IGUAL, 0, $1, $3, 0, 0);}
+	| expressao '&' expressao           {$$ = createAST(BOOL_AND, 0, $1, $3, 0, 0);}
+	| expressao '|' expressao           {$$ = createAST(BOOL_OR, 0, $1, $3, 0, 0);}
 	;
 
-cmd_attr: TK_IDENTIFIER '=' expressao	{printAST($3);}
-	| TK_IDENTIFIER '[' expressao ']' '=' expressao
+cmd_attr: TK_IDENTIFIER '=' expressao						{$$ = createAST(CMD_ATTR, $1, $3, 0, 0, 0);}
+	| TK_IDENTIFIER '[' expressao ']' '=' expressao			{$$ = createAST(CMD_ATTR, $1, $3, $6, 0, 0);}
 	;
 
-cmd_if: KW_IF '(' expressao ')' KW_THEN cmd
-	| KW_IF '(' expressao ')' KW_THEN cmd KW_ELSE cmd
+cmd_if: KW_IF '(' expressao ')' KW_THEN cmd					{$$ = createAST(CMD_IF, 0, $3, $6, 0, 0);}
+	| KW_IF '(' expressao ')' KW_THEN cmd KW_ELSE cmd		{$$ = createAST(CMD_IF, 0, $3, $6, $8, 0);}
 	;
 
-cmd_while: KW_WHILE '(' expressao ')' cmd
+cmd_while: KW_WHILE '(' expressao ')' cmd					{$$ = createAST(CMD_WHILE, 0, $3, $5, 0, 0);}
 	;
 
-print_args: LIT_STRING print_tail
-	| expressao print_tail
+print_args: LIT_STRING print_tail				{$$ = createAST(CMD_PRINT, $1, $2, 0, 0, 0);}
+	| expressao print_tail						{$$ = createAST(CMD_PRINT, 0, $1, $2, 0, 0);}
 	;
 
-print_tail: LIT_STRING print_tail
-	| expressao print_tail
-	| ';'
+print_tail: LIT_STRING print_tail				{$$ = createAST(CMD_PRINT_LIST, $1, $2, 0, 0, 0);}
+	| expressao print_tail						{$$ = createAST(CMD_PRINT_LIST, 0, $1, $2, 0, 0);}
+	| ';'										{$$ = 0;}
 	;
 
-cmd_read: KW_READ TK_IDENTIFIER
+cmd_read: KW_READ TK_IDENTIFIER					{$$ = createAST(CMD_READ, $2, 0, 0, 0, 0);}
 	;
 	
-cmd_print: KW_PRINT print_args
+cmd_print: KW_PRINT print_args					{$$ = $2;}
 	;
 	
-cmd_return: KW_RETURN expressao
+cmd_return: KW_RETURN expressao					{$$ = createAST(CMD_RETURN, 0, $2, 0, 0, 0);}
 	;
 
 %%

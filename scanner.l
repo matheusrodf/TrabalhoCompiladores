@@ -1,5 +1,5 @@
 %{
-	// Etapa 2 do trabalho de Compiladores do semestre 2024/2
+	// Etapa 3 do trabalho de Compiladores do semestre 2024/2
 	// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 	#include <iostream>
 	#include "symbols.hpp"

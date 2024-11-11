@@ -39,6 +39,7 @@ int main ()
     a = a + #1;
     print "A era=#15\n";
     };
+	a = 4 < #2 + 'a' | #5 &'a';
 
   if (1=#100) then
     {
