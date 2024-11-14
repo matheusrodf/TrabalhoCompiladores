@@ -15,22 +15,24 @@ int main(int argc, char **argv)
 
 	int token = 0;
 
-	if (argc < 2)
+	if (argc < 3)
 	{
-		fprintf(stderr, "./etapa2 <file>\n");
+		fprintf(stderr, "./etapa2 <source_file> <output_file>\n");
 		return -1;
 	}
 	else
 	{
 		yyin = fopen(argv[1], "r");
-		if (yyin == NULL) {
-			
+		if (yyin == NULL)
+		{
+
 			fprintf(stderr, "Erro ao ler o arquivo.\n");
 			return -1;
 		};
 	}
+	freopen(argv[2], "w", stdout);
 	yyparse();
-	std::cout << "\n\nNumero de linhas: " << getLineNumber() << "\n";
+	// std::cout << "\n\nNumero de linhas: " << getLineNumber() << "\n";
 
 	return 0;
 }

@@ -75,7 +75,7 @@ int yywrap() {
 		running = 1;
 	} else {
 		running = 0;
-		symbolsTable.displayTable();
+		//symbolsTable.displayTable();
 	}
 	exit(0);
 }
