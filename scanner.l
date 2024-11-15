@@ -71,11 +71,7 @@ int isRunning() {
 }
 
 int yywrap() {
-	if (!feof(yyin)) {
-		running = 1;
-	} else {
-		running = 0;
-		//symbolsTable.displayTable();
-	}
+	running = 0;
+	//symbolsTable.displayTable();
 	exit(0);
 }

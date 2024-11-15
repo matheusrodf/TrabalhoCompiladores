@@ -91,7 +91,7 @@ tipo: KW_CHAR										{$$ = createAST(CHAR, 0, 0, 0, 0, 0);}
 decVar: tipo TK_IDENTIFIER '=' init ';'				{$$ = createAST(DEC_VAR, $2, $1, $4, 0, 0);}
 	;
 
-decVec: tipo TK_IDENTIFIER '[' LIT_INT ']' VecList	{createAST(DEC_VAR, $2, $1, $6, 0, $4);}
+decVec: tipo TK_IDENTIFIER '[' LIT_INT ']' VecList	{$$ = createAST(DEC_VAR, $2, $1, $6, 0, $4);}
 	;
 
 VecList: ';'										{$$ = 0;}

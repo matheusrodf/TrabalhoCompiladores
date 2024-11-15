@@ -15,7 +15,7 @@ void printAST(AST *ast)
 				if (ast->id != NULL)
 					std::cout << ast->id->name << "[";
 				printAST(ast->filho1);
-				std::cout << "] " << std::endl;
+				std::cout << "] ";
 			}
 			else
 			{
@@ -29,15 +29,16 @@ void printAST(AST *ast)
 				std::cout << ast->id->name << "(";
 				if (ast->filho1 != NULL)
 					printAST(ast->filho1);
-				std::cout << ")" << std::endl;
+				std::cout << ")";
 			}
 			else
 			{
 				if (ast->filho1 != NULL)
 					printAST(ast->filho1);
-				std::cout << ", ";
-				if (ast->filho2 != NULL)
+				if (ast->filho2 != NULL) {
+					std::cout << ", ";
 					printAST(ast->filho2);
+				}
 			}
 			break;
 		case ARIT_SOMA:
@@ -111,7 +112,6 @@ void printAST(AST *ast)
 		case LIST_CMD:
 			if (ast->filho1 != NULL)
 				printAST(ast->filho1);
-			std::cout << "\n";
 			if (ast->filho2 != NULL)
 				printAST(ast->filho2);
 			break;
@@ -119,13 +119,15 @@ void printAST(AST *ast)
 			std::cout << "if (";
 			if (ast->filho1 != NULL)
 				printAST(ast->filho1);
-			std::cout << ") then \n";
+			std::cout << ") then {\n";
 			if (ast->filho2 != NULL)
 				printAST(ast->filho2);
+			std::cout << "\n}\n";
 			if (ast->filho3 != NULL)
 			{
-				std::cout << "else \n";
+				std::cout << "else {\n";
 				printAST(ast->filho3);
+				std::cout << "}\n";
 			}
 			break;
 		case CMD_WHILE:
@@ -133,20 +135,21 @@ void printAST(AST *ast)
 			if (ast->filho1 != NULL)
 				printAST(ast->filho1);
 			std::cout << ") " << std::endl;
+			std::cout << "{\n";
 			if (ast->filho2 != NULL)
 				printAST(ast->filho2);
-			std::cout << "\n";
+			std::cout << "} \n";
 			break;
 		case CMD_READ:
 			if (ast->id != NULL)
-				std::cout << "read " << ast->id->name;
+				std::cout << "read " << ast->id->name << "; \n";
 			break;
 		case CMD_PRINT:
 			if (ast->id != NULL)
 			{
 				std::cout << "print " << ast->id->name;
-				if (ast->filho1 != NULL)
-					printAST(ast->filho1);
+				printAST(ast->filho1);
+				std::cout << ";\n";
 			}
 			else
 			{
@@ -155,18 +158,17 @@ void printAST(AST *ast)
 					printAST(ast->filho1);
 				if (ast->filho2 != NULL)
 					printAST(ast->filho2);
+				std::cout << ";\n";
 			}
 			break;
 		case CMD_PRINT_LIST:
 			if (ast->id != NULL)
 			{
-				std::cout << "print " << ast->id->name;
-				if (ast->filho1 != NULL)
-					printAST(ast->filho1);
+				std::cout << ast->id->name;
+				printAST(ast->filho1);
 			}
 			else
 			{
-				std::cout << "print ";
 				if (ast->filho1 != NULL)
 					printAST(ast->filho1);
 				if (ast->filho2 != NULL)
@@ -177,6 +179,7 @@ void printAST(AST *ast)
 			std::cout << "return ";
 			if (ast->filho1 != NULL)
 				printAST(ast->filho1);
+			std::cout << ";\n";
 			break;
 		case CMD_ATTR:
 			if (ast->filho2 != NULL)
@@ -187,13 +190,16 @@ void printAST(AST *ast)
 					printAST(ast->filho1);
 				std::cout << "] = ";
 				printAST(ast->filho2);
+				std::cout << ";\n";
 			}
 			else
 			{
 				if (ast->id != NULL)
 					std::cout << ast->id->name << " = ";
-				if (ast->filho1 != NULL)
+				if (ast->filho1 != NULL) {
 					printAST(ast->filho1);
+					std::cout << ";\n";
+				}
 			}
 			break;
 		case DEC_VAR:
@@ -203,9 +209,12 @@ void printAST(AST *ast)
 					printAST(ast->filho1);
 				if (ast->id != NULL)
 					std::cout << " " << ast->id->name << " [";
-				std::cout << ast->id2->name << "] = ";
-				if (ast->filho2 != NULL)
+				std::cout << ast->id2->name << "]";
+				if (ast->filho2 != NULL) {
+					std::cout << " = ";
 					printAST(ast->filho2);
+				}
+				std::cout << ";\n";
 			}
 			else
 			{
@@ -218,12 +227,13 @@ void printAST(AST *ast)
 					std::cout << " = ";
 					printAST(ast->filho2);
 				}
+				std::cout << ";\n";
 			}
 			break;
 		case DEC_VAR_LIST:
 			if (ast->filho1 != NULL)
 				printAST(ast->filho1);
-			std::cout << ", ";
+			std::cout << " ";
 			if (ast->filho2 != NULL)
 				printAST(ast->filho2);
 			break;
@@ -234,45 +244,37 @@ void printAST(AST *ast)
 				std::cout << " " << ast->id->name << " (";
 			if (ast->filho2 != NULL)
 				printAST(ast->filho2);
-			std::cout << ")\n";
+			std::cout << ") { \n";
 			if (ast->filho3 != NULL)
 				printAST(ast->filho3);
+			std::cout << "\n}\n";
 			break;
 		case DEC_FUN_LIST:
 			if (ast->filho1 != NULL)
 				printAST(ast->filho1);
 			if (ast->id != NULL)
-				std::cout << " " << ast->id->name << ", ";
-			if (ast->filho2 != NULL)
+				std::cout << " " << ast->id->name;
+			if (ast->filho2 != NULL) {
+				std::cout << ", ";
 				printAST(ast->filho2);
+			}	
 			break;
 		case CHAR:
 			std::cout << "char ";
-			if (ast->filho1 != NULL)
-				printAST(ast->filho1);
+			printAST(ast->filho1);
 			break;
 		case INT:
 			std::cout << "int ";
-			if (ast->filho1 != NULL)
-				printAST(ast->filho1);
+			printAST(ast->filho1);
 			break;
 
 		default:
-			std::cout << "DESCONHECIDO ";
-			if (ast->id != NULL)
-				std::cout << "id: " << ast->id->name;
 			if (ast->filho1 != NULL)
-				std::cout << "f1: ";
-			printAST(ast->filho1);
+				printAST(ast->filho1);
 			if (ast->filho2 != NULL)
-				std::cout << "f2: ";
-			printAST(ast->filho2);
+				printAST(ast->filho2);
 			if (ast->filho3 != NULL)
-				std::cout << "f3: ";
-			printAST(ast->filho3);
-			if (ast->id2 != NULL)
-				std::cout << "id2: " << ast->id2->name;
-
+				printAST(ast->filho3);
 			break;
 		}
 	}
@@ -288,9 +290,9 @@ AST *createAST(TYPES tipo, Symbol *id, AST *filho1, AST *filho2, AST *filho3, Sy
 	ast->filho3 = filho3;
 	ast->id2 = id2;
 
-	if (tipo > 13)
-	{
-		printAST(ast);
-	}
+	//if (tipo > 13)
+	//{
+	//	printAST(ast);
+	//}
 	return ast;
 }
