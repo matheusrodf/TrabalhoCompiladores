@@ -15,7 +15,6 @@
 %union {
 	AST *ast;
 	Symbol *symbol;
-	int a;
 }
 
 %token KW_CHAR
@@ -27,6 +26,7 @@
 %token KW_READ
 %token KW_PRINT
 %token KW_RETURN
+%token KW_EOF
 %token<symbol> TK_IDENTIFIER
 %token<symbol> LIT_INT
 %token<symbol> LIT_CHAR

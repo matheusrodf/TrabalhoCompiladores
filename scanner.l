@@ -73,5 +73,6 @@ int isRunning() {
 int yywrap() {
 	running = 0;
 	//symbolsTable.displayTable();
+	return KW_EOF;
 	exit(0);
 }
