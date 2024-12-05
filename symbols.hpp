@@ -1,4 +1,4 @@
-// Etapa 3 do trabalho de Compiladores do semestre 2024/2
+// Etapa 5 do trabalho de Compiladores do semestre 2024/2
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 
 #ifndef SYMBOLS_HPP
@@ -13,10 +13,10 @@ struct Symbol;
 
 #include "parser.tab.hpp"
 
-struct Symbol {
+typedef struct Symbol {
 	std::string name;
 	int token;
-};
+} Symbol;
 
 class SymbolsTable
 {

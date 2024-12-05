@@ -1,4 +1,4 @@
-Este eh um comentariode multiplaslinhaschar a = #15 ;
+char a = #15 ;
 char c = 'x' ;
 char 7 = #100 ;
 int number = 'A' ;
@@ -39,5 +39,3 @@ int  incn (int  x, int  n) {
 return x  + n ;
 
 }
-
-[ERRO] linha: 58: a

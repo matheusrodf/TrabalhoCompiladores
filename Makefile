@@ -2,12 +2,12 @@
 # https://www.inf.ufrgs.br/~johann/comp/
 
 OPTIONS = -std=c++11 -Wall
-ETAPA = etapa3
+ETAPA = etapa5
 
 target: %$(ETAPA)
 
-%$(ETAPA): symbols.o ast.o parser.tab.o lex.yy.o
-	g++ $(OPTIONS) -o $(ETAPA) symbols.o ast.o parser.tab.o lex.yy.o
+%$(ETAPA): symbols.o ast.o parser.tab.o lex.yy.o TAC.o
+	g++ $(OPTIONS) -o $(ETAPA) symbols.o ast.o parser.tab.o lex.yy.o TAC.o 
 %.o: %.cpp %.hpp
 	g++ $(OPTIONS) $< -c
 
