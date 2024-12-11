@@ -41,6 +41,11 @@ int main ()
     print "A era=#15\n";
     };
 	a = 4 < #2 + 'a' | #5 &'a';
+	
+	while (a < #5) {
+		a = a + #1;
+		print a;
+	}
 
   if (1=#100) then
     {

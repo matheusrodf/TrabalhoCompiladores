@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 			return -1;
 		};
 	}
-	//freopen(argv[2], "w", stdout);
+	freopen(argv[2], "w", stdout);
 	yyparse();
 	// std::cout << "\n\nNumero de linhas: " << getLineNumber() << "\n";
 

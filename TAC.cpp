@@ -80,6 +80,26 @@ void printTAC(vector<TAC*> tac) {
 				fprintf(stderr, "ASS ");
 			}
 				break;
+			case TAC_BEGINFUN: {
+				fprintf(stderr, "BEGINFUN ");
+			}
+				break;
+			case TAC_ENDFUN: {
+				fprintf(stderr, "ENDFUN ");
+			}
+				break;
+			case TAC_CALL: {
+				fprintf(stderr, "CALL ");
+			}
+				break;
+			case TAC_ARG: {
+				fprintf(stderr, "ARG ");
+			}
+				break;
+			case TAC_RET: {
+				fprintf(stderr, "RET ");
+			}
+				break;
 			default: {
 				fprintf(stderr, "NADA ");
 			}
@@ -139,6 +159,15 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 		filho3 = generateCode(ast->filho3, symbolsTable);
 	}
 	
+	Symbol* f1 = NULL;
+	Symbol* f2 = NULL;
+	if (!filho1.empty()) {
+		f1 = filho1.back()->res;
+	}
+	if (!filho2.empty()) {
+		f2 = filho2.back()->res;
+	}
+	
 	vector<TAC*> result = {};
 	
 	switch(ast->tipo) {
@@ -157,12 +186,14 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 		case BOOL_IGUAL:
 		case BOOL_AND: 	
 		case BOOL_OR:
-			result = generateCodeExp(filho1, filho2, ast->tipo, symbolsTable);
+			result = joinTAC(result, filho1);
+			result = joinTAC(result, filho2);
+			result = generateCodeExp(f1, f2, ast->tipo, symbolsTable);
 			break;
 		case CMD_IF: {
-			TAC *labelFalso = new TAC(TAC_LABEL, makeLabel(symbolsTable),0,0);
+			TAC *labelFalse = new TAC(TAC_LABEL, makeLabel(symbolsTable),0,0);
 			TAC *labelTrue = new TAC(TAC_LABEL, makeLabel(symbolsTable),0,0);
-			TAC *jumpFalso = new TAC(TAC_JUMP, labelFalso->res,filho1.back()->res,0);
+			TAC *jumpFalse = new TAC(TAC_JUMP, labelFalse->res,filho1.back()->res,0);
 			TAC *jumpTrue = new TAC(TAC_JUMP, labelTrue->res,filho1.back()->res,0);
 			
 			//if (cond)
@@ -174,18 +205,18 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 			//cmd
 			//labelTrue
 			
-			//(cond)
+			//cond
 			result = joinTAC(result, filho1);
-			//if
-			result.push_back(new TAC(TAC_IF, jumpFalso->res, jumpTrue->res, filho1.back()->res));
+			//if (cond)
+			result.push_back(new TAC(TAC_IF, f1, jumpTrue->res, jumpFalse->res));
 			//jump False
-			result.push_back(jumpFalso);
+			result.push_back(jumpFalse);
 			//cmd
 			result = joinTAC(result, filho2);
 			//jumpTrue
 			result.push_back(jumpTrue);
 			//labelFalse
-			result.push_back(labelFalso);
+			result.push_back(labelFalse);
 			//else
 			//cmd
 			result = joinTAC(result, filho3);
@@ -193,16 +224,60 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 			result.push_back(labelTrue);
 		}
 			break;
+			
+		case CMD_WHILE: {
+			TAC *labelFim = new TAC(TAC_LABEL, makeLabel(symbolsTable),0,0);
+			TAC *labelLoop = new TAC(TAC_LABEL, makeLabel(symbolsTable),0,0);
+			TAC *jumpFim = new TAC(TAC_JUMP, labelFim->res,f1,0);
+			TAC *jumpLoop = new TAC(TAC_JUMP, labelLoop->res,f1,0);
+			
+		// labelLoop
+		// if (cond) jump labelFim
+		// cmd
+		// jump label
+		// label2
+	
+			// labelLoop
+			result.push_back(labelLoop);
+			//cond
+			result = joinTAC(result,filho1);
+			// if (cond) jump labelFim
+			result.push_back(new TAC(TAC_IF, f1, 0, jumpFim->res));
+			// cmd
+			result = joinTAC(result, filho2);
+			// jump label
+			result.push_back(jumpLoop);
+			// label2
+			result.push_back(labelFim);
+		}
+			break;
+			
+		case DEC_FUN:
+			result = joinTAC(result, filho2);
+			result.push_back(new TAC(TAC_BEGINFUN, ast->id, f2,0));
+			result = joinTAC(result, filho3);
+			result.push_back(new TAC(TAC_ENDFUN, ast->id, 0,0));
+			break;
+		case DEC_FUN_LIST:
+			result.push_back(new TAC(TAC_ARG, ast->id, f2,0));
+			break;
+			
+		case FUNCTION: {
+			if (ast->id != NULL) {
+				result.push_back(new TAC(TAC_CALL, ast->id, f1,0));
+			} else {
+				result.push_back(new TAC(TAC_ARG, f1, f2,0));
+			}
+		}
+			break;
+		case CMD_RETURN: {
+			result = joinTAC(result, filho1);
+			result.push_back(new TAC(TAC_RET, f1, 0,0));
+		}
+			break;
+		
 		case CMD_PRINT:
 		case CMD_PRINT_LIST: {
-			Symbol* f1 = NULL;
-			Symbol* f2 = NULL;
-			if (!filho1.empty()) {
-				f1 = filho1.back()->res;
-			}
-			if (!filho2.empty()) {
-				f2 = filho2.back()->res;
-			}
 			if (ast->id != NULL) {
 				result = joinTAC(result, filho1);
 				result.push_back(new TAC(TAC_PRINT, ast->id, f1,f2));
@@ -215,38 +290,23 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 		
 		case CMD_ATTR:
 			if (filho2.empty()) {
-				result.push_back(new TAC(TAC_MOVE, ast->id, filho1.back()->res,0));
+				result.push_back(new TAC(TAC_MOVE, ast->id, f1,0));
 			} else {
-				result.push_back(new TAC(TAC_MOVE, ast->id, filho1.back()->res,filho2.back()->res));
+				result.push_back(new TAC(TAC_MOVE, ast->id, f1,f2));
 			}
 			break;
 		
 		case DEC_VAR: {
 			if (ast->id2 != NULL) { //Vetor
-				if (filho1.empty()) {
-					result.push_back(new TAC(TAC_MOVE, ast->id, ast->id2, 0));
-				} else {
-					result.push_back(new TAC(TAC_MOVE, ast->id, ast->id2, filho1.back()->res));
-				}
+				result.push_back(new TAC(TAC_MOVE, ast->id, ast->id2, f1));
+
 			} else {
-				if (filho2.empty()) {
-					result.push_back(new TAC(TAC_MOVE, ast->id, 0,0));
-				} else {
-					result.push_back(new TAC(TAC_MOVE, ast->id, filho2.back()->res,0));
-				}
+				result.push_back(new TAC(TAC_MOVE, ast->id, f2,0));
 			}
 				result = joinTAC(result, joinTAC(filho1, filho2));
 		}
 			break;
 		case DEC_VAR_LIST: {
-			Symbol* f1 = NULL;
-			Symbol* f2 = NULL;
-			if (!filho1.empty()) {
-				f1 = filho1.back()->res;
-			}
-			if (!filho2.empty()) {
-				f2 = filho2.back()->res;
-			}
 			result = joinTAC(result, joinTAC(filho1, filho2));
 			result.push_back(new TAC(TAC_MOVE, makeTemp(symbolsTable), f1,f2));
 		}
@@ -266,11 +326,8 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 	return result;
 }
 
-vector<TAC*> generateCodeExp(vector<TAC*> filho1, vector<TAC*> filho2, TYPES tipo, SymbolsTable *symbolsTable) {
+vector<TAC*> generateCodeExp(Symbol* f1, Symbol* f2, TYPES tipo, SymbolsTable *symbolsTable) {
 	vector<TAC*> result = {};
-	
-	result = joinTAC(result, filho1);
-	result = joinTAC(result, filho2);
 	
 	TACTYPE tacTipo;
 	
@@ -308,6 +365,6 @@ vector<TAC*> generateCodeExp(vector<TAC*> filho1, vector<TAC*> filho2, TYPES tip
 		default:
 			tacTipo = TAC_ADD;
 	}
-	result.push_back(new TAC(tacTipo, makeTemp(symbolsTable), filho1.back()->res,filho2.back()->res));
+	result.push_back(new TAC(tacTipo, makeTemp(symbolsTable), f1,f2));
 	return result;
 }
