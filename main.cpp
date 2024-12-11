@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 
 	if (argc < 3)
 	{
-		fprintf(stderr, "./etapa2 <source_file> <output_file>\n");
+		fprintf(stderr, "./etapa5 <source_file> <output_file>\n");
 		return -1;
 	}
 	else
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 			return -1;
 		};
 	}
-	freopen(argv[2], "w", stdout);
+	//freopen(argv[2], "w", stdout);
 	yyparse();
 	// std::cout << "\n\nNumero de linhas: " << getLineNumber() << "\n";
 

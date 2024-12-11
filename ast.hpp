@@ -10,6 +10,7 @@ enum TYPES {
 	NENHUM = 0,
 	IDENTIFICADOR = 1,
 	FUNCTION = 2,
+	
 	ARIT_SOMA = 4,
 	ARIT_SUB = 5,
 	ARIT_MULT = 6,
@@ -21,6 +22,7 @@ enum TYPES {
 	BOOL_AND = 12,
 	BOOL_OR = 13,
 	LIST_CMD = 14,
+	
 	CMD_IF = 15,
 	CMD_WHILE = 16,
 	CMD_READ = 17,
@@ -45,7 +47,9 @@ struct AST {
 	Symbol* id2;
 };
 
-void printAST(AST *ast);
+void printCode(AST *ast);
+
+void printAST(AST *ast, int level);
 
 AST* createAST(TYPES tipo, Symbol* id, AST* filho1, AST* filho2, AST* filho3, Symbol* id2);
 

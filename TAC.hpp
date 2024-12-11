@@ -2,13 +2,14 @@
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 
 
-#ifndef SYMBOLS_HPP
-#define SYMBOLS_HPP
+#ifndef TAC_HPP
+#define TAC_HPP
 
 #include "symbols.hpp"
+#include "parser.tab.hpp"
+#include "ast.hpp"
 #include <vector>
-struct Symbol;
-struct AST;
+
 
 
 using namespace std;
@@ -18,20 +19,20 @@ enum TACTYPE {
 	TAC_LABEL,
 	TAC_MOVE, 
 	
-	TAC_SOMA, 
+	TAC_ADD, 
 	TAC_SUB,
 	TAC_MULT,
 	TAC_DIV,
 	TAC_BNEG,
-	TAC_BMENOR,
-	TAC_BMAIOR,
-	TAC_BIGUAL,
+	TAC_BLESS,
+	TAC_BHIGHER,
+	TAC_BEQUAL,
 	TAC_BAND,
 	TAC_BOR,
 	
 	TAC_BEGINFUN,
 	TAC_ENDFUN, 
-	TAC_IFZ, 
+	TAC_IF, 
 	TAC_JUMP, 
 	TAC_CALL, 
 	TAC_ARG, 
@@ -50,13 +51,15 @@ typedef struct TAC {
 	type(opcode), res(rd), op1(rs), op2(rt) {}
 } TAC;
 
-void printTAC(vector<TAC> aaa);
+void printTAC(vector<TAC*> tac);
 
-vector<TAC*> joinTAC(vector<TAC()> tac1, vector<TAC> tac2);
+vector<TAC*> joinTAC(vector<TAC*> tac1, vector<TAC*> tac2);
 
-Symbol* makeLabel();
-Symbol* makeTemp();
+Symbol* makeLabel(SymbolsTable *symbolsTable);
+Symbol* makeTemp(SymbolsTable *symbolsTable);
 
-vector<TAC> generateCode();
+vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable);
+
+vector<TAC*> generateCodeExp(vector<TAC*> filho1, vector<TAC*> filho2, TYPES tipo, SymbolsTable *symbolsTable);
 
 #endif

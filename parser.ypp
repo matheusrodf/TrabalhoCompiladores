@@ -4,10 +4,12 @@
 %{
 	#include <iostream>
 	#include "ast.hpp"
+	#include "TAC.hpp"
 	using namespace std;
-
+	
 	int yylex();
 	int yyerror(string msg);
+	extern SymbolsTable symbolsTable;;
 	extern char* yytext;
 	extern int getLineNumber();
 %}
@@ -71,7 +73,9 @@
 
 %%
 
-inicial: programa				{printAST(createAST(NENHUM, 0, $1, 0, 0, 0)); }
+inicial: programa				{printAST($1, 0); 
+								printTAC(generateCode($1, &symbolsTable));
+								}
 		;
 
 programa: decVar programa							{ $$ = createAST(NENHUM, 0, $1, $2, 0, 0); }
@@ -142,9 +146,12 @@ func_tail: ',' expressao func_tail		{$$ = createAST(FUNCTION, 0, $2, $3, 0, 0);}
 	|									{$$ = 0;}
 	;
 
-expressao: LIT_INT						{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
-	| LIT_CHAR							{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
-	| TK_IDENTIFIER						{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
+expressao: LIT_INT						{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);
+										}
+	| LIT_CHAR							{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);
+										}
+	| TK_IDENTIFIER						{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);
+										}
 	| TK_IDENTIFIER '[' expressao ']'   {$$ = createAST(IDENTIFICADOR, $1, $3, 0, 0, 0);}
 	| cmd_func							{$$ = $1;}
 	| '~' expressao						{$$ = createAST(BOOL_NEGACAO, 0, $2, 0, 0, 0);}
