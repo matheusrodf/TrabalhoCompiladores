@@ -1,2 +1,0 @@
-# TrabalhoCompiladores
-Um compilador

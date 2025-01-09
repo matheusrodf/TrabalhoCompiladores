@@ -1,4 +1,4 @@
-// Etapa 5 do trabalho de Compiladores do semestre 2024/2
+// Etapa 6 do trabalho de Compiladores do semestre 2024/2
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 
 #include <iostream>
@@ -17,8 +17,8 @@ int main(int argc, char **argv)
 
 	if (argc < 3)
 	{
-		fprintf(stderr, "./etapa5 <source_file> <output_file>\n");
-		return -1;
+		fprintf(stderr, "./etapa6 <source_file> <output_file>\n");
+		return 1;
 	}
 	else
 	{
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 		{
 
 			fprintf(stderr, "Erro ao ler o arquivo.\n");
-			return -1;
+			return 2;
 		};
 	}
 	freopen(argv[2], "w", stdout);

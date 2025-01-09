@@ -1,4 +1,4 @@
-// Etapa 5 do trabalho de Compiladores do semestre 2024/2
+// Etapa 6 do trabalho de Compiladores do semestre 2024/2
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 
 
@@ -16,7 +16,12 @@ using namespace std;
 
 enum TACTYPE {
 	
+	TAC_CHAR,
+	TAC_INT,
+	
 	TAC_MOVE, 
+	TAC_DECVAR, 
+	TAC_DECVEC, 
 	TAC_SYMBOL, 
 	TAC_LABEL,
 	TAC_ADD, 
@@ -32,6 +37,7 @@ enum TACTYPE {
 	TAC_IF, 
 	TAC_JUMP, 
 	TAC_PRINT,
+	TAC_PRINT_STRING,
 	TAC_READ,
 	
 	TAC_BEGINFUN,
@@ -61,5 +67,8 @@ Symbol* makeTemp(SymbolsTable *symbolsTable);
 vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable);
 
 vector<TAC*> generateCodeExp(Symbol* f1, Symbol* f2, TYPES tipo, SymbolsTable *symbolsTable);
+
+void generateAsm(vector<TAC*> tac, SymbolsTable *symbolsTable);
+
 
 #endif

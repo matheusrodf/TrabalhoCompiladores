@@ -1,4 +1,4 @@
-// Etapa 5 do trabalho de Compiladores do semestre 2024/2
+// Etapa 6 do trabalho de Compiladores do semestre 2024/2
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 
 #include "ast.hpp"
@@ -13,20 +13,20 @@ void printCode(AST *ast)
 			if (ast->filho1 != NULL)
 			{
 				if (ast->id != NULL)
-					std::cout << ast->id->name << "[";
+					std::cout << ast->id->value << "[";
 				printCode(ast->filho1);
 				std::cout << "] ";
 			}
 			else
 			{
 				if (ast->id != NULL)
-					std::cout << ast->id->name << " ";
+					std::cout << ast->id->value << " ";
 			}
 			break;
 		case FUNCTION:
 			if (ast->id != NULL)
 			{
-				std::cout << ast->id->name << "(";
+				std::cout << ast->id->value << "(";
 				if (ast->filho1 != NULL)
 					printCode(ast->filho1);
 				std::cout << ")";
@@ -142,12 +142,12 @@ void printCode(AST *ast)
 			break;
 		case CMD_READ:
 			if (ast->id != NULL)
-				std::cout << "read " << ast->id->name << "; \n";
+				std::cout << "read " << ast->id->value << "; \n";
 			break;
 		case CMD_PRINT:
 			if (ast->id != NULL)
 			{
-				std::cout << "print " << ast->id->name;
+				std::cout << "print " << ast->id->value;
 				printCode(ast->filho1);
 				std::cout << ";\n";
 			}
@@ -164,7 +164,7 @@ void printCode(AST *ast)
 		case CMD_PRINT_LIST:
 			if (ast->id != NULL)
 			{
-				std::cout << ast->id->name;
+				std::cout << ast->id->value;
 				printCode(ast->filho1);
 			}
 			else
@@ -185,7 +185,7 @@ void printCode(AST *ast)
 			if (ast->filho2 != NULL)
 			{
 				if (ast->id != NULL)
-					std::cout << ast->id->name << " [";
+					std::cout << ast->id->value << " [";
 				if (ast->filho1 != NULL)
 					printCode(ast->filho1);
 				std::cout << "] = ";
@@ -195,7 +195,7 @@ void printCode(AST *ast)
 			else
 			{
 				if (ast->id != NULL)
-					std::cout << ast->id->name << " = ";
+					std::cout << ast->id->value << " = ";
 				if (ast->filho1 != NULL) {
 					printCode(ast->filho1);
 					std::cout << ";\n";
@@ -203,34 +203,30 @@ void printCode(AST *ast)
 			}
 			break;
 		case DEC_VAR:
-			if (ast->id2 != NULL)
+			if (ast->filho1 != NULL)
+				printCode(ast->filho1);
+			if (ast->id != NULL)
+				std::cout << ast->id->value;
+			if (ast->filho2 != NULL)
 			{
-				if (ast->filho1 != NULL)
-					printCode(ast->filho1);
-				if (ast->id != NULL)
-					std::cout << " " << ast->id->name << " [";
-				std::cout << ast->id2->name << "]";
-				if (ast->filho2 != NULL) {
-					std::cout << " = ";
-					printCode(ast->filho2);
-				}
-				std::cout << ";\n";
+				std::cout << " = ";
+				printCode(ast->filho2);
 			}
-			else
-			{
-				if (ast->filho1 != NULL)
-					printCode(ast->filho1);
-				if (ast->id != NULL)
-					std::cout << ast->id->name;
-				if (ast->filho2 != NULL)
-				{
-					std::cout << " = ";
-					printCode(ast->filho2);
-				}
-				std::cout << ";\n";
-			}
+			std::cout << ";\n";
 			break;
-		case DEC_VAR_LIST:
+		case DEC_VEC:
+			if (ast->filho1 != NULL)
+				printCode(ast->filho1);
+			if (ast->id != NULL)
+				std::cout << " " << ast->id->value << " [";
+			std::cout << ast->id2->value << "]";
+			if (ast->filho2 != NULL) {
+				std::cout << " = ";
+				printCode(ast->filho2);
+			}
+			std::cout << ";\n";
+			break;
+		case DEC_VEC_LIST:
 			if (ast->filho1 != NULL)
 				printCode(ast->filho1);
 			std::cout << " ";
@@ -241,7 +237,7 @@ void printCode(AST *ast)
 			if (ast->filho1 != NULL)
 				printCode(ast->filho1);
 			if (ast->id != NULL)
-				std::cout << " " << ast->id->name << " (";
+				std::cout << " " << ast->id->value << " (";
 			if (ast->filho2 != NULL)
 				printCode(ast->filho2);
 			std::cout << ") { \n";
@@ -253,7 +249,7 @@ void printCode(AST *ast)
 			if (ast->filho1 != NULL)
 				printCode(ast->filho1);
 			if (ast->id != NULL)
-				std::cout << " " << ast->id->name;
+				std::cout << " " << ast->id->value;
 			if (ast->filho2 != NULL) {
 				std::cout << ", ";
 				printCode(ast->filho2);
@@ -351,7 +347,10 @@ void printAST(AST *ast, int level)
 		case DEC_VAR:
 			fprintf(stderr, "DEC_VAR: ");
 			break;
-		case DEC_VAR_LIST:
+			case DEC_VEC:
+			fprintf(stderr, "DEC_VEC: ");
+			break;
+		case DEC_VEC_LIST:
 			fprintf(stderr, "DEC_VAR_LIST: ");
 			break;
 		case DEC_FUN:
@@ -370,8 +369,8 @@ void printAST(AST *ast, int level)
 			fprintf(stderr, "-: ");
 			break;
 		}
-		if(ast->id != NULL) fprintf(stderr, "%s ", ast->id->name.c_str());
-		if(ast->id2 != NULL) fprintf(stderr, "%s ", ast->id2->name.c_str());
+		if(ast->id != NULL) fprintf(stderr, "%s ", ast->id->value.c_str());
+		if(ast->id2 != NULL) fprintf(stderr, "%s ", ast->id2->value.c_str());
 			fprintf(stderr, "\n");
 		if (ast->filho1 != NULL)
 			printAST(ast->filho1, level+1);

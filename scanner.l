@@ -1,5 +1,5 @@
 %{
-	// Etapa 5 do trabalho de Compiladores do semestre 2024/2
+	// Etapa 6 do trabalho de Compiladores do semestre 2024/2
 	// Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 	#include <iostream>
 	#include "symbols.hpp"
@@ -9,6 +9,8 @@
 	int lineCount = 1;
 
 	SymbolsTable symbolsTable;
+	
+	Symbol* createLabelString(int token);
 
 	int getLineNumber();
 	void initMe();
@@ -34,11 +36,16 @@
 "return"						{ return KW_RETURN;  }
 [-,;:()[\]{}=+*/%<>&|~]			{ return yytext[0];  }
 
-#[0-9]+ 						{ yylval.symbol = symbolsTable.createSymbol(LIT_INT, yytext); return LIT_INT; }
-\'.\'							{ yylval.symbol = symbolsTable.createSymbol(LIT_CHAR, yytext); return LIT_CHAR;   }
-\"(\\\"|[^"\n])*\"				{ yylval.symbol = symbolsTable.createSymbol(LIT_STRING, yytext); return LIT_STRING; }
+#[0-9]+ 						{ string num = yytext;
+								  num = num.substr(1, num.size());
+								  num = "c_" + num;
+								  yylval.symbol = symbolsTable.createSymbol(LIT_INT, num.substr(2,num.size()), num); return LIT_INT; }
+\'.\'							{ yylval.symbol = createLabelString(LIT_CHAR); return LIT_CHAR;}
+\"(\\\"|[^"\n])*\"				{ yylval.symbol = createLabelString(LIT_STRING); return LIT_STRING; }
 
-[0-9a-zA-Z]+ 					{ yylval.symbol = symbolsTable.createSymbol(TK_IDENTIFIER, yytext); return TK_IDENTIFIER; }
+[0-9a-zA-Z]+ 					{ string txt = yytext;
+								  txt = '_' + txt;
+								  yylval.symbol = symbolsTable.createSymbol(TK_IDENTIFIER, txt, txt); return TK_IDENTIFIER; }
 
 [ \t]							{  }
 "\n"							{ lineCount++; }
@@ -57,6 +64,16 @@
 
 %%
 
+Symbol* createLabelString(int token) {
+	static int labelStringId;
+	string label = "stringName";
+	label += to_string(labelStringId++);
+	
+	Symbol* sym = symbolsTable.createSymbol(token, yytext, label);
+	
+	return sym;
+}
+
 int getLineNumber() {
 	return lineCount;
 }
@@ -73,7 +90,6 @@ int isRunning() {
 
 int yywrap() {
 	running = 0;
-	//symbolsTable.displayTable();
 	return KW_EOF;
 	exit(0);
 }

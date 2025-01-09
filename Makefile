@@ -2,7 +2,7 @@
 # https://www.inf.ufrgs.br/~johann/comp/
 
 OPTIONS = -std=c++11 -Wall
-ETAPA = etapa5
+ETAPA = etapa6
 
 target: %$(ETAPA)
 
@@ -17,4 +17,4 @@ parser.tab.cpp: parser.ypp
 lex.yy.cpp: scanner.l
 	flex -o lex.yy.cpp scanner.l
 clean:
-	rm *.o lex.yy.cpp parser.tab.cpp parser.tab.hpp $(ETAPA)
+	rm *.o lex.yy.cpp parser.tab.cpp parser.tab.hpp $(ETAPA) a.out

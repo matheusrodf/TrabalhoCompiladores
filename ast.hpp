@@ -1,4 +1,4 @@
-// Etapa 5 do trabalho de Compiladores do semestre 2024/2
+// Etapa 6 do trabalho de Compiladores do semestre 2024/2
 // Por Matheus Rodrigues Fonseca e Thalles Fernandes Rezende
 
 #ifndef AST_HPP
@@ -31,7 +31,8 @@ enum TYPES {
 	CMD_RETURN = 19,
 	CMD_ATTR = 20,
 	DEC_VAR = 21,
-	DEC_VAR_LIST = 22,
+	DEC_VEC = 27,
+	DEC_VEC_LIST = 22,
 	DEC_FUN = 23,
 	DEC_FUN_LIST = 24,
 	CHAR = 25,
