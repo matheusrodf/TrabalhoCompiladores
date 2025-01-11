@@ -7,40 +7,42 @@
 #include "symbols.hpp"
 
 enum TYPES {
-	NENHUM = 0,
-	IDENTIFICADOR = 1,
-	FUNCTION = 2,
+	NENHUM,
+	IDENTIFICADOR,
+	FUNCTION,
+	FUN_PARAMS,
 	
-	ARIT_SOMA = 4,
-	ARIT_SUB = 5,
-	ARIT_MULT = 6,
-	ARIT_DIV = 7,
-	BOOL_NEGACAO = 8,
-	BOOL_MENOR = 9,
-	BOOL_MAIOR = 10,
-	BOOL_IGUAL = 11,
-	BOOL_AND = 12,
-	BOOL_OR = 13,
-	LIST_CMD = 14,
+	ARIT_SOMA,
+	ARIT_SUB,
+	ARIT_MULT,
+	ARIT_DIV,
+	BOOL_NEGACAO,
+	BOOL_MENOR,
+	BOOL_MAIOR,
+	BOOL_IGUAL,
+	BOOL_AND,
+	BOOL_OR,
+	LIST_CMD,
 	
-	CMD_IF = 15,
-	CMD_WHILE = 16,
-	CMD_READ = 17,
-	CMD_PRINT = 18,
-	CMD_PRINT_LIST = 3,
-	CMD_RETURN = 19,
-	CMD_ATTR = 20,
-	DEC_VAR = 21,
-	DEC_VEC = 27,
-	DEC_VEC_LIST = 22,
-	DEC_FUN = 23,
-	DEC_FUN_LIST = 24,
-	CHAR = 25,
-	INT = 26
+	CMD_IF,
+	CMD_WHILE,
+	CMD_READ,
+	CMD_PRINT,
+	CMD_RETURN,
+	CMD_ATTR,
+	DEC_VAR,
+	DEC_VEC,
+	DEC_VEC_LIST,
+	DEC_FUN,
+	DEC_FUN_LIST,
+	CHAR,
+	INT
 };
 
 struct AST {
-	TYPES tipo;
+	DATATYPE datatype;
+	TYPES type;
+	int args;
 	Symbol* id;
 	AST* filho1;
 	AST* filho2;
@@ -52,8 +54,16 @@ void printCode(AST *ast);
 
 void printAST(AST *ast, int level);
 
-AST* createAST(TYPES tipo, Symbol* id, AST* filho1, AST* filho2, AST* filho3, Symbol* id2);
+AST* createAST(TYPES type, Symbol* id, AST* filho1, AST* filho2, AST* filho3, Symbol* id2);
 
+int semanticVerification(AST *ast, SymbolsTable *symbolsTable);
 
+int getNumArgs(AST *ast);
+
+AST* setReturnType(AST *ast, DATATYPE type);
+
+bool checkDeclaration(AST *ast, SymbolsTable *symbolsTable, bool isError, AST* parent);
+
+bool checkDataType(AST *ast, SymbolsTable *symbolsTable, bool isError);
 
 #endif

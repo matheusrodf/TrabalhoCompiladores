@@ -32,11 +32,11 @@
 %token KW_EOF
 
 %token<symbol> TK_IDENTIFIER
-%token<symbol> TK_IDENTIFIER_INT
-%token<symbol> TK_IDENTIFIER_CHAR
+%token<symbol> TK_ID
 %token<symbol> TK_LABEL
 %token<symbol> TK_FUN
 %token<symbol> TK_VEC
+
 %token<symbol> LIT_INT
 %token<symbol> LIT_CHAR
 %token<symbol> LIT_STRING
@@ -80,12 +80,14 @@
 
 %%
 
-inicial: programa				{//printAST($1, 0); 
+inicial: programa				{
 								//symbolsTable.displayTable();
-								//printTAC(generateCode($1, &symbolsTable));
-								//fprintf(stderr, "\n");
+								if (semanticVerification($1, &symbolsTable) > 0) exit(4);
+								fprintf(stderr,"\n --- Print AST ---\n\n");
+								printAST($1, 0);
+								fprintf(stderr,"\n --- Print TAC ---\n\n");
+								printTAC(generateCode($1, &symbolsTable));
 								generateAsm(generateCode($1, &symbolsTable), &symbolsTable);
-								//symbolsTable.displayTable();
 								}
 		;
 
@@ -110,7 +112,7 @@ decVar: tipo TK_IDENTIFIER '=' init ';'				{$$ = createAST(DEC_VAR, $2, $1, $4, 
 decVec: tipo TK_IDENTIFIER '[' LIT_INT ']' VecList	{$$ = createAST(DEC_VEC, $2, $1, $6, 0, $4);}
 	;
 
-VecList: ';'										{$$ = 0;}
+VecList: ';'										{$$ = 0;} //DEC_VEC_LIST id = DEC_VEC id
 	| '=' init VecList2								{$$ = createAST(DEC_VEC_LIST, 0, $2, $3, 0, 0);}
 	;
 
@@ -118,10 +120,11 @@ VecList2: init VecList2								{$$ = createAST(DEC_VEC_LIST, 0, $1, $2, 0, 0);}
 	| ';'											{$$ = 0;}
 	;
 
-decFun: tipo TK_IDENTIFIER '(' params ')' block		{$$ = createAST(DEC_FUN, $2, $1, $4, $6, 0);}
+decFun: tipo TK_IDENTIFIER '(' params ')' block		{$$ = createAST(DEC_FUN, $2, $1, $4, $6, $2);}
 	;
 
-params: tipo TK_IDENTIFIER tail						{$$ = createAST(DEC_FUN_LIST, $2, $1, $3, 0, 0);}
+params: tipo TK_IDENTIFIER tail						{ //DEC_FUN_LIST id2 = DEC_FUN id
+													 $$ = createAST(DEC_FUN_LIST, $2, $1, $3, 0, 0);}
 	|												{$$ = 0;}
 	;
 
@@ -150,11 +153,11 @@ cmd_func: TK_IDENTIFIER '(' func_params ')'		{$$ = createAST(FUNCTION, $1, $3, 0
 	;
 
 
-func_params: expressao func_tail		{$$ = createAST(FUNCTION, 0, $1, $2, 0, 0);}
+func_params: expressao func_tail		{$$ = createAST(FUN_PARAMS, 0, $1, $2, 0, 0);}
 	|									{$$ = 0;}
 	;
 
-func_tail: ',' expressao func_tail		{$$ = createAST(FUNCTION, 0, $2, $3, 0, 0);}
+func_tail: ',' expressao func_tail		{$$ = createAST(FUN_PARAMS, 0, $2, $3, 0, 0);}
 	|									{$$ = 0;}
 	;
 
@@ -177,7 +180,7 @@ expressao: LIT_INT						{$$ = createAST(IDENTIFICADOR, $1, 0, 0, 0, 0);}
 	;
 
 cmd_attr: TK_IDENTIFIER '=' expressao						{$$ = createAST(CMD_ATTR, $1, $3, 0, 0, 0);}
-	| TK_IDENTIFIER '[' expressao ']' '=' expressao			{$$ = createAST(CMD_ATTR, $1, $3, $6, 0, 0);}
+	| TK_IDENTIFIER '[' expressao ']' '=' expressao			{$$ = createAST(CMD_ATTR, $1, $6, $3, 0, 0);}
 	;
 
 cmd_if: KW_IF '(' expressao ')' KW_THEN cmd					{$$ = createAST(CMD_IF, 0, $3, $6, 0, 0);}
@@ -187,11 +190,11 @@ cmd_if: KW_IF '(' expressao ')' KW_THEN cmd					{$$ = createAST(CMD_IF, 0, $3, $
 cmd_while: KW_WHILE '(' expressao ')' cmd					{$$ = createAST(CMD_WHILE, 0, $3, $5, 0, 0);}
 	;
 
-print_args: LIT_STRING print_tail				{$$ = createAST(CMD_PRINT, $1, $2, 0, 0, 0);}
+print_args: LIT_STRING print_tail				{$$ = createAST(CMD_PRINT, $1, 0, $2, 0, 0);}
 	| expressao print_tail						{$$ = createAST(CMD_PRINT, 0, $1, $2, 0, 0);}
 	;
 
-print_tail: LIT_STRING print_tail				{$$ = createAST(CMD_PRINT, $1, $2, 0, 0, 0);}
+print_tail: LIT_STRING print_tail				{$$ = createAST(CMD_PRINT, $1, 0, $2, 0, 0);}
 	| expressao print_tail						{$$ = createAST(CMD_PRINT, 0, $1, $2, 0, 0);}
 	| ';'										{$$ = 0;}
 	;
@@ -208,6 +211,6 @@ cmd_return: KW_RETURN expressao					{$$ = createAST(CMD_RETURN, 0, $2, 0, 0, 0);
 %%
 
 int yyerror(string msg) {
-	std::cout << "\n[ERRO] linha: " << getLineNumber() << ": " << yytext << "\n";
+	fprintf(stderr, "\n[ERRO] linha: %d: %s\n", getLineNumber(), yytext);
 	exit(3);
 }

@@ -1,14 +1,15 @@
-int a = #2;
-int b = #4;
+int a = #1;
+char b = #2;
+char c = #3;
 
 int main() {
-  a = a * (#5 + #2) / #2 - b;
-  print a;
-  b = #2;
-}
-
-
-int fun() {
-  1 = #10;
-  return 1;
+  print "Insira uma letra: ";
+  read b;
+  print "Insira um numero: ";
+  read a;
+  if (b < a) then {
+	print "A letra " b " eh menor que " a;
+  } else {
+	print "A letra " b " eh maior que " a;
+  }
 }

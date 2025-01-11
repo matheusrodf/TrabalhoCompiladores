@@ -28,6 +28,7 @@ void printTAC(vector<TAC*> tac) {
 			case TAC_SUB: {
 				fprintf(stderr, "SUB ");
 			}
+				break;
 			case TAC_MULT: {
 				fprintf(stderr, "MULT ");
 			}
@@ -68,12 +69,24 @@ void printTAC(vector<TAC*> tac) {
 				fprintf(stderr, "JUMP ");
 			}
 				break;
-			case TAC_PRINT: {
-				fprintf(stderr, "PRINT ");
+			case TAC_PRINT_CHAR: {
+				fprintf(stderr, "PRINT C ");
 			}
 				break;
-			case TAC_READ: {
-				fprintf(stderr, "READ ");
+			case TAC_PRINT_STRING: {
+				fprintf(stderr, "PRINT S ");
+			}
+				break;
+			case TAC_PRINT_INT: {
+				fprintf(stderr, "PRINT I ");
+			}
+				break;
+			case TAC_READ_CHAR: {
+				fprintf(stderr, "READ C ");
+			}
+				break;
+			case TAC_READ_INT: {
+				fprintf(stderr, "READ I ");
 			}
 				break;
 			case TAC_MOVE: {
@@ -92,6 +105,10 @@ void printTAC(vector<TAC*> tac) {
 				fprintf(stderr, "CALL ");
 			}
 				break;
+			case TAC_DEC_ARG: {
+				fprintf(stderr, "DECARG ");
+			}
+				break;
 			case TAC_ARG: {
 				fprintf(stderr, "ARG ");
 			}
@@ -104,20 +121,24 @@ void printTAC(vector<TAC*> tac) {
 				fprintf(stderr, "DECVEC ");
 			}
 				break;
+			case TAC_SYMBOL_VEC: {
+				fprintf(stderr, "SYM_VEC ");
+			}
+				break;
 			default: {
 				fprintf(stderr, "NADA ");
 			}
 				break;
 		}
 		if (kv->res) {
-			fprintf(stderr, "%s ", kv->res->nickname.c_str());
-		} else fprintf(stderr, "0 ");
+			fprintf(stderr, "(%s ", kv->res->nickname.c_str());
+		} else fprintf(stderr, "(0 ");
 		if (kv->op1) {
 			fprintf(stderr, "%s ", kv->op1->nickname.c_str());
 		} else fprintf(stderr, "0 ");
 		if (kv->op2) {
-			fprintf(stderr, "%s ", kv->op2->nickname.c_str());
-		} else fprintf(stderr, "0 ");
+			fprintf(stderr, "%s) ", kv->op2->nickname.c_str());
+		} else fprintf(stderr, "0) ");
 		fprintf(stderr, "\n");
 	}
 }
@@ -133,14 +154,14 @@ Symbol* makeLabel(SymbolsTable *symbolsTable) {
 	static int labelId;
 	string label = "label";
 	label += to_string(labelId++);
-	return symbolsTable->createSymbol(TK_LABEL, label, label);
+	return symbolsTable->createSymbol(TK_LABEL, label, label, SYM_NONE);
 }
 
 Symbol* makeTemp(SymbolsTable *symbolsTable) {
 	static int tempId;
 	string temp = "temp";
 	temp += to_string(tempId++);
-	return symbolsTable->createSymbol(TK_IDENTIFIER, temp, temp);
+	return symbolsTable->createSymbol(TK_ID, temp, temp, SYM_NONE);
 }
 
 vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
@@ -174,9 +195,15 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 	
 	vector<TAC*> result = {};
 	
-	switch(ast->tipo) {
+	switch(ast->type) {
 		case IDENTIFICADOR: {
-			result.push_back(new TAC(TAC_SYMBOL, ast->id,0,0));
+			if (f1 != NULL) {
+				Symbol *temp = makeTemp(symbolsTable);
+				result = joinTAC(result, filho1);
+				result.push_back(new TAC(TAC_SYMBOL_VEC, temp, ast->id, f1));
+				result.push_back(new TAC(TAC_SYMBOL, temp,0,0));
+			}
+			else result.push_back(new TAC(TAC_SYMBOL, ast->id,0,0));
 		}
 			break;
 			
@@ -192,7 +219,7 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 		case BOOL_OR:
 			result = joinTAC(result, filho1);
 			result = joinTAC(result, filho2);
-			result = joinTAC(result, generateCodeExp(f1, f2, ast->tipo, symbolsTable));
+			result = joinTAC(result, generateCodeExp(f1, f2, ast->type, symbolsTable));
 			break;
 		case CMD_IF: {
 			TAC *labelFalse = new TAC(TAC_LABEL, makeLabel(symbolsTable),0,0);
@@ -255,22 +282,32 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 			break;
 			
 		case DEC_FUN:
-			result = joinTAC(result, filho2);
-			ast->id = symbolsTable->modifySymbol(ast->id->nickname, TK_FUN, ast->id->value);
 			result.push_back(new TAC(TAC_BEGINFUN, ast->id, f2,0));
+			result = joinTAC(result, filho2);
 			result = joinTAC(result, filho3);
 			result.push_back(new TAC(TAC_ENDFUN, ast->id, 0,0));
 			break;
-		case DEC_FUN_LIST:
-			result.push_back(new TAC(TAC_ARG, ast->id, f2,0));
+		case DEC_FUN_LIST: {
+			TAC *arg = new TAC(TAC_DEC_ARG, ast->id,ast->id2, 0);
+			arg->args = ast->args;
+			result.push_back(arg);
+			result = joinTAC(result, filho2);
+		}
 			break;
 			
 		case FUNCTION: {
-			if (ast->id != NULL) {
-				result.push_back(new TAC(TAC_CALL, ast->id, f1,0));
-			} else {
-				result.push_back(new TAC(TAC_ARG, f1, f2,0));
-			}
+			result = joinTAC(result, filho1);
+			Symbol *temp = makeTemp(symbolsTable);
+			result.push_back(new TAC(TAC_CALL, ast->id, f1,0));
+			result.push_back(new TAC(TAC_MOVERETURN, temp, 0,0));
+		}
+			break;
+		case FUN_PARAMS: {
+			TAC *arg = new TAC(TAC_ARG, f1, f2,ast->id2);
+			result = joinTAC(result, filho1);
+			arg->args = ast->args;
+			result.push_back(arg);
+			result = joinTAC(result, filho2);
 		}
 			break;
 		case CMD_RETURN: {
@@ -282,11 +319,17 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 		
 		case CMD_PRINT: {
 			if (ast->id != NULL) {
-				result.push_back(new TAC(TAC_PRINT_STRING, ast->id, f1,f2));
-				result = joinTAC(result, filho1);
+				result.push_back(new TAC(TAC_PRINT_STRING, ast->id, f2,0));
+				result = joinTAC(result, filho2);
 			} else {
-				result.push_back(new TAC(TAC_PRINT, f1, f2, 0));
-				result = joinTAC(result, joinTAC(filho1, filho2));
+				result = joinTAC(result, filho1);
+				if (ast->datatype == SYM_CHAR) {
+					result.push_back(new TAC(TAC_PRINT_CHAR, f1, f2, 0));
+				} else if (ast->datatype == SYM_INT) {
+					result.push_back(new TAC(TAC_PRINT_INT, f1, f2, 0));					
+				}
+					
+				result = joinTAC(result, filho2);
 			}
 		}
 			break;
@@ -296,33 +339,34 @@ vector<TAC*> generateCode(AST *ast, SymbolsTable *symbolsTable) {
 				result = joinTAC(result, filho1);
 				result.push_back(new TAC(TAC_MOVE, ast->id, f1,0));
 			} else {
+				result = joinTAC(result, joinTAC(filho1, filho2));
 				result.push_back(new TAC(TAC_MOVE, ast->id, f1,f2));
 			}
 			break;
 		
 		case DEC_VAR: {
-			if (ast->filho1->tipo == CHAR)
-				ast->id = symbolsTable->modifySymbol(ast->id->nickname, TK_IDENTIFIER_CHAR, ast->id->value);
-			else 
-				ast->id = symbolsTable->modifySymbol(ast->id->nickname, TK_IDENTIFIER_INT, ast->id->value);
 			result.push_back(new TAC(TAC_MOVE, ast->id, f2,0));
 			result = joinTAC(result, joinTAC(filho1, filho2));
 		}
 			break;
 		case DEC_VEC: {
-			ast->id = symbolsTable->modifySymbol(ast->id->nickname, TK_VEC, ast->id2->value);
-			result.push_back(new TAC(TAC_DECVEC, ast->id, ast->id2, f2));
+			//result.push_back(new TAC(TAC_DECVEC, ast->id, ast->id2, f2));
 			result = joinTAC(result, joinTAC(filho1, filho2));
 		}
 			break;
 		case DEC_VEC_LIST: {
-			result.push_back(new TAC(TAC_DECVEC, 0, f1,f2));
+			TAC *arg = new TAC(TAC_DECVEC, ast->id, f1,f2);
+			arg->args = ast->args;
+			result.push_back(arg);
 			result = joinTAC(result, joinTAC(filho1, filho2));
 		}
 			break;
 			
 		case CMD_READ:
-			result.push_back(new TAC(TAC_READ, ast->id,0,0));
+			if (ast->datatype == SYM_CHAR) 
+				result.push_back(new TAC(TAC_READ_CHAR, ast->id,0,0));
+			else if (ast->datatype == SYM_INT) 
+				result.push_back(new TAC(TAC_READ_INT, ast->id,0,0));
 			break;
 		
 		case LIST_CMD:	
@@ -379,7 +423,7 @@ vector<TAC*> generateCodeExp(Symbol* f1, Symbol* f2, TYPES tipo, SymbolsTable *s
 }
 
 void generateAsm(vector<TAC*> tac, SymbolsTable *symbolsTable) {
-	printf(".data\n.printInt: .string \"%%d\\n\"\n.printChar: .string \"%%c\\n\"\n.globl main\n");
+	printf(".data\n.printInt: .string \"%%d\"\n.printChar: .string \"%%c\"\n.printNewLine: .string \"\\n\"\n.readChar: .string \" %%c\"\n.globl main\n");
 	
 	symbolsTable->printAsmSymbols();
 	printf(".text\n");
@@ -387,6 +431,20 @@ void generateAsm(vector<TAC*> tac, SymbolsTable *symbolsTable) {
 	
 	for (const auto &kv : tac) {
 		switch(kv->type) {
+			
+			case TAC_SYMBOL_VEC: {
+			//TAC(TAC_SYMBOL_VEC, temp, ast->id, f1));
+				printf("\n # SYMBOL_VEC\n");
+				printf("movl %s(%%rip), %%eax\n leaq 0(,%%rax,4), %%rdx\n ", kv->op2->nickname.c_str());
+				printf("leaq %s(%%rip), %%rax\n movl (%%rdx,%%rax), %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str() , kv->res->nickname.c_str());
+				}
+				break;
+				
+			case TAC_MOVERETURN: {
+				printf("\n # MOVERETURN\n");
+				printf("movl %%eax, %s(%%rip)\n", kv->res->nickname.c_str());
+			}
+				break;
 			case TAC_LABEL: {
 				printf("%s:\n", kv->res->nickname.c_str());
 			}
@@ -396,97 +454,144 @@ void generateAsm(vector<TAC*> tac, SymbolsTable *symbolsTable) {
 				//movl op1(%rip), %eax
 				//addl op2(%rip), %eax
 				//movl %eax, res(%rip)
+				printf("\n # ADD\n");
 				printf("movl %s(%%rip), %%eax\n addl %s(%%rip), %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->op2->nickname.c_str(), kv->res->nickname.c_str());
 				}
 				break;
 			case TAC_SUB: {
+				printf("\n # SUB\n");
 				printf("movl %s(%%rip), %%eax\n subl %s(%%rip), %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->op2->nickname.c_str(), kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_MULT: {
+				printf("\n # MULT\n");
 				printf("movl %s(%%rip), %%edx\n movl %s(%%rip), %%eax\n imull %%edx, %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->op2->nickname.c_str(), kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_DIV: {
+				printf("\n # DIV\n");
 				printf("movl %s(%%rip), %%eax\n movl %s(%%rip), %%ecx\n cltd\n idivl %%ecx, %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->op2->nickname.c_str(), kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_BNEG: {
+				printf("\n # NEG\n");
 				printf("movl %s(%%rip), %%eax\n testl %%eax, %%eax\n sete %%al\n movzbl %%al, %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_BLESS: {
+				printf("\n # LESS\n");
 				printf("movl %s(%%rip), %%edx\n movl %s(%%rip), %%eax\n cmpl %%eax, %%edx\n setl %%al\n movzbl %%al, %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->op2->nickname.c_str(), kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_BHIGHER: {
+				printf("\n # \n");
 				printf("movl %s(%%rip), %%edx\n movl %s(%%rip), %%eax\n cmpl %%eax, %%edx\n setg %%al\n movzbl %%al, %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->op2->nickname.c_str(), kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_BEQUAL: {
+				printf("\n # =\n");
 				printf("movl %s(%%rip), %%edx\n movl %s(%%rip), %%eax\n cmpl %%eax, %%edx\n sete %%al\n movzbl %%al, %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->op2->nickname.c_str(), kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_BAND: {
+				printf("\n # AND\n");
 				printf("movl %s(%%rip), %%edx\n movl %s(%%rip), %%eax\n andl %%edx, %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->op2->nickname.c_str(), kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_BOR: {
+				printf("\n # OR\n");
 				printf("movl %s(%%rip), %%edx\n movl %s(%%rip), %%eax\n orl %%edx, %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->op2->nickname.c_str(), kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_IF: {
+				printf("\n # IF\n");
 				printf("movl %s(%%rip), %%eax\n testl %%eax, %%eax\n", kv->res->nickname.c_str());
 				printf(" je %s\n", kv->op1->nickname.c_str());
 			}
 				break;
 			case TAC_JUMP: {
+				printf("\n # JMP\n");
 				printf("jmp %s\n", kv->res->nickname.c_str());
 			}
 				break;
-			case TAC_PRINT: {
-				if ((kv->res->value[0] == '\'') || (kv->res->token == TK_IDENTIFIER_CHAR)) {
-					printf("movl %s(%%rip), %%eax\n movl %%eax, %%esi\n leaq .printChar(%%rip), %%rax\n movq %%rax, %%rdi\n call printf@PLT\n", kv->res->nickname.c_str());
-				} else {
-					printf("movl %s(%%rip), %%eax\n movl %%eax, %%esi\n leaq .printInt(%%rip), %%rax\n movq %%rax, %%rdi\n call printf@PLT\n", kv->res->nickname.c_str());
+			case TAC_PRINT_CHAR: {
+				printf("\n # PRINT_CHAR\n");
+				printf("movl %s(%%rip), %%eax\n movl %%eax, %%esi\n leaq .printChar(%%rip), %%rax\n movq %%rax, %%rdi\n call printf@PLT\n", kv->res->nickname.c_str());
+				if (kv->op1 == NULL) {
+					printf("leaq .printNewLine(%%rip), %%rax\n movq %%rax, %%rdi\n call printf@PLT\n");
+				}
+			}
+				break;
+			case TAC_PRINT_INT: {
+				printf("\n # PRINT_INT\n");
+				printf("movl %s(%%rip), %%eax\n movl %%eax, %%esi\n leaq .printInt(%%rip), %%rax\n movq %%rax, %%rdi\n call printf@PLT\n", kv->res->nickname.c_str());
+				if (kv->op1 == NULL) {
+					printf("leaq .printNewLine(%%rip), %%rax\n movq %%rax, %%rdi\n call printf@PLT\n");
 				}
 			}
 				break;
 			case TAC_PRINT_STRING: {
+				printf("\n # PRINT_STRING\n");
 				printf("leaq %s(%%rip), %%rax\n movq %%rax, %%rdi\n call printf@PLT\n", kv->res->nickname.c_str());
+				if (kv->op1 == NULL) {
+					printf("leaq .printNewLine(%%rip), %%rax\n movq %%rax, %%rdi\n call printf@PLT\n");
+				}
 			}
 				break;
-			case TAC_READ: {
-				printf("call getchar@PLT\n movl %%eax, %s(%%rip)\n", kv->res->nickname.c_str());
+			case TAC_READ_INT: {
+				printf("\n # READ_INT\n");
+				printf("leaq %s(%%rip), %%rax\n movq %%rax, %%rsi\n", kv->res->nickname.c_str());
+				printf("leaq .printInt(%%rip), %%rax\n movq %%rax, %%rdi\n call scanf@PLT\n");
+			}
+				break;
+			case TAC_READ_CHAR: {
+				printf("\n # READ_CHAR\n");
+				printf("leaq %s(%%rip), %%rax\n movq %%rax, %%rsi\n", kv->res->nickname.c_str());
+				printf("leaq .readChar(%%rip), %%rax\n movq %%rax, %%rdi\n call scanf@PLT\n");
 			}
 				break;
 			case TAC_MOVE: {
-				printf("movl %s(%%rip), %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->res->nickname.c_str());
+				printf("\n # MOVE\n");
+				if (kv->op2 != NULL) {
+					printf("  # VEC\n");
+					printf("movl %s(%%rip), %%edx\n movl %s(%%rip), %%eax\n movslq %%edx, %%rdx\n leaq 0(,%%rdx,4), %%rcx\n leaq %s(%%rip), %%rdx\n movl %%eax, (%%rcx, %%rdx)\n", kv->op2->nickname.c_str(), kv->op1->nickname.c_str(), kv->res->nickname.c_str());					
+				} else {
+					printf("movl %s(%%rip), %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->res->nickname.c_str());
+				}
 			}
 				break;
-				
 			case TAC_DECVEC: {
-				
-				//printf("movl %s(%%rip), %%eax\n movl %%eax, %d+%s(%%rip)\n", kv->op1->nickname.c_str(), 4*i, kv->res->nickname.c_str());
+				printf("\n # DECVEC\n");
+				printf("movl %s(%%rip), %%eax\n movl %%eax, %d+%s(%%rip)\n", kv->op1->nickname.c_str(), 4*kv->args, kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_BEGINFUN: {
+				printf("\n # BEGINFUN\n");
 				printf("%s:\n pushq %%rbp\n movq %%rsp, %%rbp\n", kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_ENDFUN: {
+				printf("\n # ENDFUN\n");
 				printf("popq %%rbp\n ret\n");
 			}
 				break;
 			case TAC_CALL: {
-				fprintf(stderr, "CALL ");
+				printf("\n # CALL\n");
+				printf("call %s\n", kv->res->nickname.c_str());
+			}
+				break;
+			case TAC_DEC_ARG: {
+				printf("\n # DEC ARG\n");
+				printf("movl %s_%d(%%rip), %%eax\n movl %%eax, %s(%%rip)\n", kv->op1->nickname.c_str(), kv->args, kv->res->nickname.c_str());
 			}
 				break;
 			case TAC_ARG: {
-				fprintf(stderr, "ARG ");
+				printf("\n # ARG\n");
+				printf("movl %s(%%rip), %%eax\n movl %%eax, %s_%d(%%rip)\n", kv->res->nickname.c_str(), kv->op2->nickname.c_str(), kv->args);
 			}
 				break;
 			case TAC_RET: {
+				printf("\n # RETURN\n");
 				printf("movl %s(%%rip), %%eax\n", kv->res->nickname.c_str());
 			}
 				break;

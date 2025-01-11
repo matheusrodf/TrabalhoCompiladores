@@ -20,9 +20,11 @@ enum TACTYPE {
 	TAC_INT,
 	
 	TAC_MOVE, 
+	TAC_MOVERETURN,
 	TAC_DECVAR, 
 	TAC_DECVEC, 
 	TAC_SYMBOL, 
+	TAC_SYMBOL_VEC, 
 	TAC_LABEL,
 	TAC_ADD, 
 	TAC_SUB,
@@ -36,14 +38,17 @@ enum TACTYPE {
 	TAC_BOR,
 	TAC_IF, 
 	TAC_JUMP, 
-	TAC_PRINT,
+	TAC_PRINT_CHAR,
+	TAC_PRINT_INT,
 	TAC_PRINT_STRING,
-	TAC_READ,
+	TAC_READ_INT,
+	TAC_READ_CHAR,
 	
 	TAC_BEGINFUN,
 	TAC_ENDFUN, 
 	TAC_CALL, 
 	TAC_ARG, 
+	TAC_DEC_ARG, 
 	TAC_RET, 
 };
 
@@ -52,6 +57,7 @@ typedef struct TAC {
 	Symbol *res;
 	Symbol *op1;
 	Symbol *op2;
+	int args;
 	
 	TAC(int opcode, Symbol *rd, Symbol *rs, Symbol *rt) :
 	type(opcode), res(rd), op1(rs), op2(rt) {}

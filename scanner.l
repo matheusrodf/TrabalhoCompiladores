@@ -39,13 +39,13 @@
 #[0-9]+ 						{ string num = yytext;
 								  num = num.substr(1, num.size());
 								  num = "c_" + num;
-								  yylval.symbol = symbolsTable.createSymbol(LIT_INT, num.substr(2,num.size()), num); return LIT_INT; }
+								  yylval.symbol = symbolsTable.createSymbol(LIT_INT, num.substr(2,num.size()), num, SYM_INT); return LIT_INT; }
 \'.\'							{ yylval.symbol = createLabelString(LIT_CHAR); return LIT_CHAR;}
 \"(\\\"|[^"\n])*\"				{ yylval.symbol = createLabelString(LIT_STRING); return LIT_STRING; }
 
 [0-9a-zA-Z]+ 					{ string txt = yytext;
 								  txt = '_' + txt;
-								  yylval.symbol = symbolsTable.createSymbol(TK_IDENTIFIER, txt, txt); return TK_IDENTIFIER; }
+								  yylval.symbol = symbolsTable.createSymbol(TK_IDENTIFIER, txt, txt, SYM_NONE); return TK_IDENTIFIER; }
 
 [ \t]							{  }
 "\n"							{ lineCount++; }
@@ -65,12 +65,16 @@
 %%
 
 Symbol* createLabelString(int token) {
-	static int labelStringId;
-	string label = "stringName";
-	label += to_string(labelStringId++);
-	
-	Symbol* sym = symbolsTable.createSymbol(token, yytext, label);
-	
+	Symbol* sym = symbolsTable.find(yytext);
+	if (sym == NULL) {
+		static int labelStringId;
+		string label = "stringName";
+		label += to_string(labelStringId++);
+		if (token == LIT_CHAR)
+			sym = symbolsTable.createSymbol(token, yytext, label, SYM_CHAR);
+		else 
+			sym = symbolsTable.createSymbol(token, yytext, label, SYM_STRING);
+	}
 	return sym;
 }
 
