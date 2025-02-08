@@ -1,6 +1,3 @@
-# Esse arquivo foi feito com base no Makefile disponibilizado no site do Marcelo Johann
-# https://www.inf.ufrgs.br/~johann/comp/
-
 OPTIONS = -std=c++11 -Wall
 ETAPA = etapa6
 
