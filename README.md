@@ -20,11 +20,11 @@ A linguagem também permite comentários de única linha, com **//** e comentár
 - Variáveis só podem ser declaradas fora de funções (ou seja, globais) e precisam ter tipo *int* ou *char* e um valor inicial, que pode ser int ou char.
 - Declaração de variáveis é assim:
 > int var = #0;
-char 1 = 'a';
+> char 1 = 'a';
 
 - Declaração de vetor pode ou não ter valores iniciais, separados por espaço e deve ter o tamanho do vetor.
 > int vetor[#5];
-char vetChar[#3] = 'a' #0 #1;
+> char vetChar[#3] = 'a' #0 #1;
 
 - Parâmetros de função precisam ter nomes de variável únicos.
 - Ao final de cada comando é necessário um ponto e vírgula **;**
